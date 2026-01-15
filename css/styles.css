@@ -1035,25 +1035,29 @@ body {
 }
 /* seleccion.css */
 
-/* Layout específico */
+/* seleccion.css - Estilos específicos para la selección de imagen */
+
+/* Layout específico centrado */
 .centered-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
-    height: 100vh; /* Asegurar altura completa */
-    overflow-y: auto;
+    /* Permite scroll si la grilla es muy alta en móviles */
+    overflow-y: auto; 
+    height: 100vh;
 }
 
-/* Título */
+/* Título Cartoon */
 .title-cartoon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     color: var(--blue-primary);
     -webkit-text-stroke: 2px var(--blue-dark);
     text-transform: uppercase;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     text-align: center;
-    text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Grilla de Imágenes */
@@ -1061,20 +1065,21 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: 20px;
+    gap: 25px;
     width: 90%;
-    max-width: 900px;
+    max-width: 950px;
     margin-bottom: 30px;
-    perspective: 1000px; /* Para efecto visual 3D suave si se desea */
+    animation: dropIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    padding-bottom: 20px; /* Espacio extra abajo */
 }
 
 /* Tarjeta de Imagen */
 .image-card {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1; /* Mantener formato cuadrado */
+    aspect-ratio: 4/3; /* Formato rectangular para fotos */
     border-radius: 20px;
-    border: 4px solid rgba(255, 255, 255, 0.6);
+    border: 5px solid white;
     overflow: hidden;
     cursor: pointer;
     background: #fff;
@@ -1092,9 +1097,8 @@ body {
 
 /* Efecto Hover */
 .image-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    border-color: #fff;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     z-index: 2;
 }
 
@@ -1106,14 +1110,17 @@ body {
 .image-card:focus-visible {
     outline: 4px solid var(--blue-primary);
     outline-offset: 4px;
-    transform: scale(1.05);
+    transform: translateY(-5px);
 }
 
 /* Estado Seleccionado */
 .image-card.selected {
-    border: 6px solid var(--green-primary);
-    transform: scale(1.02);
-    box-shadow: 0 0 0 4px rgba(105, 240, 174, 0.3); /* Resplandor */
+    border-color: var(--green-primary);
+    transform: scale(1.03);
+    box-shadow: 
+        0 0 0 5px var(--green-primary), 
+        0 15px 35px rgba(0,0,0,0.2);
+    z-index: 3;
 }
 
 /* Overlay de Confirmación (Check) */
@@ -1123,13 +1130,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(46, 204, 113, 0.3); /* Verde semitransparente */
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: opacity 0.2s;
-    pointer-events: none; /* Dejar pasar clics */
+    pointer-events: none;
 }
 
 .image-card.selected .selection-overlay {
@@ -1137,26 +1144,50 @@ body {
 }
 
 .check-icon {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     color: var(--green-primary);
     background: #fff;
     border-radius: 50%;
-    padding: 10px;
+    padding: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     transform: scale(0);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .image-card.selected .check-icon {
     transform: scale(1);
 }
 
+/* Etiqueta de nombre */
+.card-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    padding: 20px 10px 8px;
+    font-family: var(--font-stack);
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    transform: translateY(100%);
+    transition: transform 0.3s;
+    text-align: center;
+}
+
+.image-card:hover .card-label,
+.image-card.selected .card-label {
+    transform: translateY(0);
+}
+
 /* Botonera */
 .actions-container {
     display: flex;
     gap: 30px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    z-index: 10;
 }
 
 .btn-return {
@@ -1172,12 +1203,18 @@ body {
     transition: all 0.2s;
 }
 
+/* Estado deshabilitado del botón Continuar */
 .btn-primary:disabled {
-    background-color: #ccc;
+    background-color: #bdc3c7;
     box-shadow: none;
     cursor: not-allowed;
     transform: none;
-    opacity: 0.7;
+    opacity: 0.6;
+}
+
+.btn-primary:not(:disabled):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 var(--blue-dark);
 }
 
 .btn:active {
@@ -1185,22 +1222,34 @@ body {
     box-shadow: 0 2px 0;
 }
 
+/* Animaciones */
+@keyframes slideInDown { 
+    from { opacity: 0; transform: translateY(-50px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+@keyframes dropIn { 
+    0% { opacity: 0; transform: translateY(50px) scale(0.9); } 
+    100% { opacity: 1; transform: translateY(0) scale(1); } 
+}
+
 /* Responsividad */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .selection-grid {
         grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+        gap: 15px;
     }
     .title-cartoon { font-size: 2.5rem; }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 600px) {
     .selection-grid {
-        grid-template-columns: 1fr; /* 1 columna en móviles pequeños si es necesario, o mantener 2 pequeñas */
-        gap: 15px;
+        grid-template-columns: 1fr; /* 1 columna en móviles pequeños */
+        max-width: 350px;
     }
     .actions-container {
         width: 90%;
-        flex-direction: column-reverse;
+        flex-direction: column-reverse; /* Continuar arriba en móvil */
+        gap: 15px;
     }
     .btn { width: 100%; justify-content: center; }
 }
