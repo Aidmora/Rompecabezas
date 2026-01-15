@@ -81,13 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnContinue) {
         btnContinue.addEventListener('click', () => {
             if (selectedUrl) {
-                // Navegar a la pantalla del JUEGO (Crearemos juego.html luego)
-                // Por ahora usamos un alert para confirmar el flujo
-                console.log("Imagen guardada:", selectedUrl);
-                alert("¡Imagen lista! Iniciando el juego...");
-                
-                // DESCOMENTAR ESTA LÍNEA CUANDO TENGAS juego.html
-                // window.location.href = 'juego.html'; 
+                window.location.href = 'juego.html';
             }
         });
     }

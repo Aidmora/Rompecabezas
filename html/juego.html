@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rompecabezas - Jugando</title>
+    <!-- Asegúrate de que estos archivos existan en la carpeta ../css/ -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/juego.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 1. RECURSOS GLOBALES SVG (DEFINICIÓN DE COLORES) -->
+    <!-- ========================================== -->
+    <svg width="0" height="0" style="position: absolute; overflow: hidden;" aria-hidden="true">
+        <defs>
+            <!-- Gradientes del Personaje -->
+            <linearGradient id="globalSuitGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1"/><stop offset="50%" style="stop-color:#2563EB;stop-opacity:1"/><stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalCapeGradient" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" style="stop-color:#EF4444;stop-opacity:1"/><stop offset="100%" style="stop-color:#991B1B;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalSkinGradient" x1="0%" y1="0%" x2="100%" y2="50%"><stop offset="0%" style="stop-color:#FFE4C4;stop-opacity:1"/><stop offset="100%" style="stop-color:#F5C19B;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalGoldGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#FCD34D;stop-opacity:1"/><stop offset="50%" style="stop-color:#F59E0B;stop-opacity:1"/><stop offset="100%" style="stop-color:#B45309;stop-opacity:1"/></linearGradient>
+            <!-- Otros gradientes necesarios -->
+            <linearGradient id="globalMetalGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#E5E7EB;stop-opacity:1"/><stop offset="50%" style="stop-color:#9CA3AF;stop-opacity:1"/><stop offset="100%" style="stop-color:#4B5563;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalBlueEye" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#60A5FA;stop-opacity:1"/><stop offset="100%" style="stop-color:#2563EB;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalDogFur" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#F59E0B;stop-opacity:1"/><stop offset="100%" style="stop-color:#B45309;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalAltSuit" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#10B981;stop-opacity:1"/><stop offset="100%" style="stop-color:#047857;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalAltCape" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1"/><stop offset="100%" style="stop-color:#5B21B6;stop-opacity:1"/></linearGradient>
+            <linearGradient id="globalSkinGradientAlt" x1="0%" y1="0%" x2="100%" y2="50%"><stop offset="0%" style="stop-color:#FFE4C4;stop-opacity:1"/><stop offset="100%" style="stop-color:#F5C19B;stop-opacity:1"/></linearGradient>
+        </defs>
+    </svg>
+
+    <!-- Fondo del juego -->
+    <div class="bg-pattern" aria-hidden="true"></div>
+
+    <!-- ========================================== -->
+    <!-- 2. CABECERA SUPERIOR (NUEVO DISEÑO) -->
+    <!-- ========================================== -->
+    <header class="game-header-bar">
+        <!-- Botón Hamburguesa (Abre menú lateral) -->
+        <button id="btn-menu-toggle" class="btn-icon-menu" aria-label="Abrir menú de opciones">
+            <span class="hamburger-icon" style="font-size: 2rem;">☰</span>
+        </button>
+
+        <!-- Información Central: Misión y Tiempo -->
+        <div class="game-info-center">
+            <h2 id="game-instruction" style="margin:0; font-size:1rem; color:#666; text-transform:uppercase;">Misión</h2>
+            <div class="timer-badge">
+                <span class="icon">⏱️</span>
+                <span id="timer">00:00</span>
+            </div>
+        </div>
+
+        <!-- Contador de Movimientos -->
+        <div class="score-badge">
+            <span>Movs:</span> <strong id="move-count">0</strong>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- 3. MENÚ LATERAL DESPLEGABLE (OCULTO) -->
+    <!-- ========================================== -->
+    <div id="side-menu-overlay" class="menu-overlay hidden">
+        <aside class="side-menu-panel">
+            <div class="menu-header">
+                <h3>Opciones</h3>
+                <button id="btn-menu-close" class="btn-close-menu" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+            </div>
+            <nav class="menu-controls">
+                <button id="btn-pause" class="btn-menu-item btn-pause">
+                    <span class="icon">⏸️</span> Pausar Juego
+                </button>
+                <button id="btn-back-menu" class="btn-menu-item btn-back">
+                    <span class="icon">↩️</span> Volver a Revisión
+                </button>
+                <button id="btn-cancel-game" class="btn-menu-item btn-cancel-game">
+                    <span class="icon">❌</span> Salir al Inicio
+                </button>
+            </nav>
+        </aside>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. ÁREA DE JUEGO PRINCIPAL -->
+    <!-- ========================================== -->
+    <main class="game-container game-layout-centered">
+        
+        <!-- Tablero Maximizado -->
+        <section class="board-area">
+            
+            <!-- Espacio donde vive el rompecabezas -->
+            <div id="game-workspace" class="game-workspace">
+                <!-- Capa inferior: Slots del tablero -->
+                <div id="puzzle-board" class="puzzle-board"></div>
+                
+                <!-- Capa superior: Piezas desordenadas (para drag & drop) -->
+                <div id="scattered-layer" class="scattered-layer"></div>
+            </div>
+
+            <!-- Botonera Inferior -->
+            <div class="game-controls-bottom">
+                <!-- Botón Ayuda (Inicialmente oculto, JS lo muestra si tardas) -->
+                <button id="btn-help" class="btn-help hidden" aria-label="Pedir ayuda">
+                    <span>💡</span> Pista
+                </button>
+                
+                <!-- Botón Principal -->
+                <button id="btn-check" class="btn-check">
+                    Comprobar Solución
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 5. ELEMENTOS FLOTANTES -->
+    <!-- ========================================== -->
+
+    <!-- Asistente Virtual -->
+    <aside class="mascot-section game-mascot">
+        <div class="speech-bubble" id="mascot-text" role="status" aria-live="polite">
+            ¡Prepárate para el desafío!
+        </div>
+        <div id="global-mascot-container" class="mascot-vector-container">
+            <!-- El JS llenará esto con el avatar seleccionado -->
+        </div>
+    </aside>
+
+    <!-- Modal de Victoria -->
+    <div id="victory-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>¡Felicidades Héroe! 🎉</h2>
+            <p>¡Completaste el rompecabezas!</p>
+            <div class="modal-stats">
+                <p>Tiempo: <span id="final-time">00:00</span></p>
+                <p>Movimientos: <span id="final-moves">0</span></p>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-replay" class="btn btn-large btn-save">Jugar de Nuevo</button>
+                <button id="btn-menu" class="btn btn-large btn-return">Menú Principal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vinculación del Script -->
+    <script src="../js/juego.js"></script>
+</body>
+</html>
