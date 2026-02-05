@@ -274,10 +274,10 @@ body {
 .group-difficulty legend::before { background: var(--red-primary); }
 .group-size legend { color: var(--blue-primary); }
 .group-size legend::before { background: var(--blue-primary); }
-.group-stimuli legend { color: var(--green-dark); }
-.group-stimuli legend::before { background: var(--green-primary); }
-.group-time legend { color: var(--yellow-dark); }
-.group-time legend::before { background: var(--yellow-primary); }
+.group-stimuli legend { color: var(--red-primary); }
+.group-stimuli legend::before { background: var(--red-primary); }
+.group-time legend { color: var(--red-primary); }
+.group-time legend::before { background: var(--red-primary); }
 
 .radio-options {
   display: flex;
@@ -319,10 +319,10 @@ body {
   background-color: #FFE5E5; color: white; box-shadow: 0 4px 10px rgba(68, 138, 255, 0.4);
 }
 .group-stimuli input:checked + .radio-btn {
-  background-color: var(--green-primary); color: #2c3e50; box-shadow: 0 4px 10px rgba(105, 240, 174, 0.4);
+  background-color: #FFE5E5; color: white; box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
 }
 .group-time input:checked + .radio-btn {
-  background-color: var(--yellow-primary); color: #4a4a4a; box-shadow: 0 4px 10px rgba(255, 215, 64, 0.4);
+  background-color: #FFE5E5; color: white; box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
 }
 
 .settings-preview-panel {
@@ -2239,7 +2239,7 @@ nav a:focus-visible {
 }
 
 .group-time input:checked + .radio-btn {
-  background-color: #f59e0b;
+  background-color: #FFE5E5;
   color: #1a1a1a;
 }
 
@@ -2250,7 +2250,7 @@ nav a:focus-visible {
 }
 
 .group-stimuli input:checked + .radio-btn {
-  background-color: #10b981;
+  background-color: #FFE5E5;
   color: #1a1a1a;
 }
 

@@ -641,17 +641,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedAvatar && mascotContainer) mascotContainer.innerHTML = savedAvatar;
     }
 
-    if (btnBackMenu) btnBackMenu.addEventListener('click', () => window.location.href = '../html/revision.html');
+    if (btnBackMenu) btnBackMenu.addEventListener('click', () => window.location.href = '../revision.html');
     
     if (btnCancelGame) {
         btnCancelGame.addEventListener('click', () => {
             if (confirm("¿Salir al menú principal? Perderás el progreso.")) {
-                window.location.href = '../html/index.html';
+                window.location.href = '../index.html';
             }
         });
     }
     
-    if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = '../html/index.html');
+    if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = '../index.html');
     if (btnReplay) btnReplay.addEventListener('click', () => location.reload());
     
     if (btnPause) {
