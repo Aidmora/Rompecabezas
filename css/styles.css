@@ -3,7 +3,6 @@
    ========================================= */
 
 :root {
-  /* Paleta de Colores (Diseño de Alta Fidelidad) */
   --red-primary: #ff5252;
   --red-dark: #c0392b;
   --blue-primary: #448aff;
@@ -12,15 +11,12 @@
   --green-dark: #27ae60;
   --yellow-primary: #ffd740;
   --yellow-dark: #f39c12;
-
-  /* Textos y Fondos */
   --text-color: #2c3e50;
   --font-stack: "Fredoka", "Segoe UI", sans-serif;
   --bg-color: #f0f4f8;
-  --glass-bg: rgba(255, 255, 255, 0.92); /* Fondo semitransparente para paneles */
+  --glass-bg: rgba(255, 255, 255, 0.92);
 }
 
-/* Reset Básico */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -31,7 +27,7 @@ body {
   font-family: var(--font-stack);
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Evitar scroll en la ventana principal */
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -39,7 +35,6 @@ body {
   position: relative;
 }
 
-/* Fondo con patrón sutil (Puntos) */
 .bg-pattern {
   position: absolute;
   top: 0;
@@ -56,7 +51,6 @@ body {
    2. ELEMENTOS GLOBALES DE UI
    ========================================= */
 
-/* Panel de Usuario (Esquina Superior Derecha) */
 .user-info-panel {
   position: absolute;
   top: 25px;
@@ -82,7 +76,6 @@ body {
   font-size: 1.1rem;
 }
 
-/* Estado Resaltado */
 .user-info-panel.highlight {
   transform: scale(1.1);
   box-shadow: 0 0 0 4px rgba(68, 138, 255, 0.2), 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -90,7 +83,6 @@ body {
   background-color: #f0f8ff;
 }
 
-/* Título Principal (Posición Absoluta) */
 .game-header {
   position: absolute;
   top: 30px;
@@ -111,7 +103,6 @@ body {
   animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Contenedor Principal (SPA) */
 .game-container {
   display: flex;
   flex-direction: column;
@@ -122,18 +113,17 @@ body {
   z-index: 10;
 }
 
-/* Secciones de Pantalla (Transiciones) */
 .screen-section {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center; /* CENTRADO HORIZONTAL */
-  justify-content: center; /* CENTRADO VERTICAL */
+  align-items: center;
+  justify-content: center;
   position: absolute;
   top: 0;
   left: 0;
-  pointer-events: none; /* No clickable cuando está oculto */
+  pointer-events: none;
   opacity: 0;
   transform: scale(0.95);
   transition: opacity 0.4s ease-in-out, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -163,7 +153,6 @@ body {
   font-size: 2rem;
 }
 
-/* Estilos de Botones Principales */
 .btn {
   font-family: var(--font-stack);
   font-size: 1.6rem;
@@ -180,12 +169,9 @@ body {
   position: relative;
   box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  
-  /* Animación de entrada */
   animation: dropIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
-/* Retrasos escalonados */
 .btn:nth-child(1) { animation-delay: 0.1s; }
 .btn:nth-child(2) { animation-delay: 0.2s; }
 .btn:nth-child(3) { animation-delay: 0.3s; }
@@ -206,7 +192,6 @@ body {
   outline-offset: 6px;
 }
 
-/* Variantes de Color */
 .btn-play { background-color: var(--red-primary); box-shadow: 0 8px 0 var(--red-dark); }
 .btn-settings { background-color: var(--blue-primary); box-shadow: 0 8px 0 var(--blue-dark); }
 .btn-instructions { background-color: var(--green-primary); color: #333; box-shadow: 0 8px 0 var(--green-dark); }
@@ -235,7 +220,7 @@ body {
 
 .settings-grid-layout {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr; /* Izq más ancho */
+  grid-template-columns: 1.2fr 0.8fr;
   gap: 40px;
   width: 100%;
   max-width: 1000px;
@@ -270,6 +255,7 @@ body {
   height: 25px;
   border-radius: 10px;
 }
+
 .group-difficulty legend { color: var(--red-primary); }
 .group-difficulty legend::before { background: var(--red-primary); }
 .group-size legend { color: var(--blue-primary); }
@@ -311,7 +297,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Estados Seleccionados */
 .group-difficulty input:checked + .radio-btn {
   background-color: #FFE5E5; color: white; box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
 }
@@ -488,13 +473,13 @@ body {
 .mascot-vector-container svg { width: 100%; height: 100%; }
 
 /* =========================================
-   6. PANTALLA PERSONALIZAR (CENTRADOS FIX)
+   6. PANTALLA PERSONALIZAR
    ========================================= */
 
 #customize-screen {
-    justify-content: center; /* Cambiado a center */
+    justify-content: center;
     padding-top: 20px; 
-    width: 100%; /* Asegurar ancho completo */
+    width: 100%;
 }
 
 .customize-layout {
@@ -503,7 +488,7 @@ body {
     max-width: 950px;
     gap: 50px;
     align-items: center;
-    justify-content: center; /* Asegurar contenido centrado */
+    justify-content: center;
     background: var(--glass-bg); 
     backdrop-filter: blur(20px);
     padding: 50px;
@@ -738,7 +723,6 @@ body {
 
 .step-card:hover { transform: translateY(-10px) scale(1.03); }
 
-/* Tarjeta 1: Arrastrar */
 .step-card.drag-step { border-color: var(--blue-primary); }
 .step-card.drag-step .step-icon-container {
     background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
@@ -747,7 +731,6 @@ body {
 .step-card.drag-step h3 { color: var(--blue-dark); }
 .step-card.drag-step .step-number { background: var(--blue-primary); }
 
-/* Tarjeta 2: Rotar */
 .step-card.rotate-step { border-color: var(--yellow-dark); }
 .step-card.rotate-step .step-icon-container {
     background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
@@ -805,7 +788,6 @@ body {
     margin: 0;
 }
 
-/* Animaciones Instrucciones */
 .drag-animation rect { animation: movePiece 2.5s infinite ease-in-out; }
 .drag-animation path.hand { animation: moveHand 2.5s infinite ease-in-out; }
 .rotate-animation rect { transform-origin: center; animation: rotatePiece 3s infinite ease-in-out; }
@@ -962,7 +944,6 @@ body {
     font-weight: 800;
 }
 
-/* Botón Comenzar */
 .btn-start {
     flex: 1.5;
     background-color: var(--green-primary);
@@ -992,13 +973,19 @@ body {
     box-shadow: 0 2px 0 var(--green-dark);
 }
 
-/* --- KEYFRAMES GENERALES --- */
+/* =========================================
+   9. KEYFRAMES GENERALES
+   ========================================= */
+
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes slideInDown { from { opacity: 0; transform: translateY(-50px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes dropIn { 0% { opacity: 0; transform: translateY(-50px); } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes popIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-/* Responsividad General */
+/* =========================================
+   10. RESPONSIVIDAD GENERAL
+   ========================================= */
+
 @media (max-width: 900px) {
   .game-header { position: relative; text-align: center; top: auto; left: auto; margin-top: 60px; margin-bottom: 20px; }
   .game-header h1 { font-size: 3rem; }
@@ -1009,13 +996,11 @@ body {
   .settings-actions { flex-direction: column; gap: 15px; }
   .mascot-section { opacity: 0.2; }
 
-  /* Customize en Móvil */
   .customize-layout { flex-direction: column; padding: 30px; margin-top: 80px; gap: 30px; }
   .avatar-preview-card { width: 180px; height: 180px; border-radius: 50%; }
   .avatar-grid { grid-template-columns: repeat(4, 1fr); gap: 15px; }
   .preview-label { font-size: 1rem; margin-top: 10px; }
 
-  /* Instrucciones en Móvil */
   .instructions-layout { padding: 25px; margin-top: 80px; gap: 20px; }
   .instructions-text-card { font-size: 1rem; padding: 15px; }
   .steps-container { flex-direction: column; align-items: center; gap: 20px; }
@@ -1026,29 +1011,26 @@ body {
   .step-card p { font-size: 0.95rem; }
   .step-number { width: 30px; height: 30px; font-size: 1rem; top: 10px; left: 10px; display: none; }
 
-  /* Revisión en Móvil */
   .review-layout { padding: 25px; width: 95%; margin-top: 80px; }
   .review-item { padding: 12px 15px; }
   .review-icon { width: 45px; height: 45px; font-size: 1.4rem; margin-right: 15px; }
   .review-value { font-size: 1.2rem; }
   .btn-start, .btn-cancel { width: 100%; flex: auto; }
 }
-/* seleccion.css */
 
-/* seleccion.css - Estilos específicos para la selección de imagen */
+/* =========================================
+   11. PANTALLA SELECCIÓN DE IMAGEN
+   ========================================= */
 
-/* Layout específico centrado */
 .centered-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
-    /* Permite scroll si la grilla es muy alta en móviles */
     overflow-y: auto; 
     height: 100vh;
 }
 
-/* Título Cartoon */
 .title-cartoon {
     font-size: 3.5rem;
     color: var(--blue-primary);
@@ -1060,7 +1042,6 @@ body {
     animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Grilla de Imágenes */
 .selection-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1070,14 +1051,13 @@ body {
     max-width: 950px;
     margin-bottom: 30px;
     animation: dropIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-    padding-bottom: 20px; /* Espacio extra abajo */
+    padding-bottom: 20px;
 }
 
-/* Tarjeta de Imagen */
 .image-card {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/3; /* Formato rectangular para fotos */
+    aspect-ratio: 4/3;
     border-radius: 20px;
     border: 5px solid white;
     overflow: hidden;
@@ -1095,7 +1075,6 @@ body {
     transition: transform 0.4s ease;
 }
 
-/* Efecto Hover */
 .image-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0,0,0,0.2);
@@ -1106,14 +1085,12 @@ body {
     transform: scale(1.1);
 }
 
-/* Efecto Focus (Accesibilidad) */
 .image-card:focus-visible {
     outline: 4px solid var(--blue-primary);
     outline-offset: 4px;
     transform: translateY(-5px);
 }
 
-/* Estado Seleccionado */
 .image-card.selected {
     border-color: var(--green-primary);
     transform: scale(1.03);
@@ -1123,14 +1100,13 @@ body {
     z-index: 3;
 }
 
-/* Overlay de Confirmación (Check) */
 .selection-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(46, 204, 113, 0.3); /* Verde semitransparente */
+    background: rgba(46, 204, 113, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1159,7 +1135,6 @@ body {
     transform: scale(1);
 }
 
-/* Etiqueta de nombre */
 .card-label {
     position: absolute;
     bottom: 0;
@@ -1182,7 +1157,6 @@ body {
     transform: translateY(0);
 }
 
-/* Botonera */
 .actions-container {
     display: flex;
     gap: 30px;
@@ -1203,7 +1177,6 @@ body {
     transition: all 0.2s;
 }
 
-/* Estado deshabilitado del botón Continuar */
 .btn-primary:disabled {
     background-color: #bdc3c7;
     box-shadow: none;
@@ -1222,20 +1195,9 @@ body {
     box-shadow: 0 2px 0;
 }
 
-/* Animaciones */
-@keyframes slideInDown { 
-    from { opacity: 0; transform: translateY(-50px); } 
-    to { opacity: 1; transform: translateY(0); } 
-}
-@keyframes dropIn { 
-    0% { opacity: 0; transform: translateY(50px) scale(0.9); } 
-    100% { opacity: 1; transform: translateY(0) scale(1); } 
-}
-
-/* Responsividad */
 @media (max-width: 900px) {
     .selection-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+        grid-template-columns: repeat(2, 1fr);
         gap: 15px;
     }
     .title-cartoon { font-size: 2.5rem; }
@@ -1243,16 +1205,20 @@ body {
 
 @media (max-width: 600px) {
     .selection-grid {
-        grid-template-columns: 1fr; /* 1 columna en móviles pequeños */
+        grid-template-columns: 1fr;
         max-width: 350px;
     }
     .actions-container {
         width: 90%;
-        flex-direction: column-reverse; /* Continuar arriba en móvil */
+        flex-direction: column-reverse;
         gap: 15px;
     }
     .btn { width: 100%; justify-content: center; }
-}/* Estilos específicos para la Pantalla de Juego */
+}
+
+/* =========================================
+   12. PANTALLA DE JUEGO - HEADER
+   ========================================= */
 
 .game-top-bar {
     position: absolute;
@@ -1297,20 +1263,18 @@ body {
     color: #555;
 }
 
-/* Layout del Juego */
 .game-layout {
     display: flex;
     flex-direction: row;
-    align-items: center; /* Centrar verticalmente */
+    align-items: center;
     justify-content: center;
     gap: 40px;
-    padding-top: 80px; /* Espacio para la barra superior */
+    padding-top: 80px;
     height: 100%;
     width: 90%;
     margin: 0 auto;
 }
 
-/* Áreas */
 .pieces-area, .board-area {
     background: var(--glass-bg);
     padding: 20px;
@@ -1324,7 +1288,7 @@ body {
 
 .pieces-area {
     flex: 1;
-    height: 80%; /* Altura fija para scroll */
+    height: 80%;
     max-width: 300px;
 }
 
@@ -1342,7 +1306,6 @@ h3 {
     text-transform: uppercase;
 }
 
-/* Contenedor de Piezas Sueltas */
 .pieces-pool {
     display: flex;
     flex-wrap: wrap;
@@ -1355,10 +1318,8 @@ h3 {
     align-content: flex-start;
 }
 
-/* El Tablero */
 .puzzle-board {
     display: grid;
-    /* Las columnas y filas se definen en JS según config */
     gap: 2px;
     background-color: rgba(255,255,255,0.5);
     border: 4px solid var(--blue-primary);
@@ -1368,7 +1329,6 @@ h3 {
     z-index: 2;
 }
 
-/* Guía de fondo (Imagen semitransparente) */
 .guide-overlay {
     position: absolute;
     top: 50%; left: 50%;
@@ -1378,17 +1338,15 @@ h3 {
     pointer-events: none;
     background-size: cover;
     border-radius: 10px;
-    /* El tamaño se ajusta con JS */
 }
 
-/* La Pieza Individual */
 .puzzle-piece {
-    background-size: var(--board-width) var(--board-height); /* Variable CSS dinámica */
+    background-size: var(--board-width) var(--board-height);
     cursor: grab;
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    touch-action: none; /* Importante para arrastrar en móvil */
+    touch-action: none;
 }
 
 .puzzle-piece:active {
@@ -1397,7 +1355,6 @@ h3 {
     z-index: 100;
 }
 
-/* Estilo de Drop Zone (Slot del tablero) */
 .drop-zone {
     background: rgba(255,255,255,0.3);
     border: 2px dashed rgba(0,0,0,0.1);
@@ -1412,17 +1369,15 @@ h3 {
     border-color: var(--green-primary);
 }
 
-/* Animación de rotación */
 .puzzle-piece[data-rotation="90"] { transform: rotate(90deg); }
 .puzzle-piece[data-rotation="180"] { transform: rotate(180deg); }
 .puzzle-piece[data-rotation="270"] { transform: rotate(270deg); }
 .puzzle-piece[data-rotation="0"] { transform: rotate(0deg); }
 
-/* Feedback Visual de Error/Éxito */
 .puzzle-piece.correct {
     border: 3px solid var(--green-primary);
     animation: pulseGreen 0.5s;
-    pointer-events: none; /* Ya no se puede mover */
+    pointer-events: none;
 }
 
 .puzzle-piece.incorrect {
@@ -1430,7 +1385,6 @@ h3 {
     border: 3px solid var(--red-primary);
 }
 
-/* Modal */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -1464,17 +1418,16 @@ h3 {
     100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
 }
 
-/* Responsividad */
 @media (max-width: 900px) {
     .game-layout {
-        flex-direction: column-reverse; /* Piezas abajo, tablero arriba */
+        flex-direction: column-reverse;
         gap: 20px;
         padding-top: 70px;
     }
     .pieces-area {
         width: 100%;
         max-width: 100%;
-        height: 150px; /* Tira horizontal */
+        height: 150px;
         flex-direction: row;
         overflow-x: auto;
     }
@@ -1489,17 +1442,16 @@ h3 {
         flex: auto;
     }
 }
-/* Estilos específicos para la Pantalla de Juego */
+
 /* =========================================
-   ESTILOS ESPECÍFICOS: PANTALLA DE JUEGO
+   13. PANTALLA DE JUEGO - LAYOUT COMPLETO
    ========================================= */
 
-/* --- 1. CABECERA SUPERIOR (HEADER) --- */
 .game-header-bar {
     position: absolute;
     top: 0; left: 0; 
     width: 100%;
-    height: 80px; /* Altura fija */
+    height: 80px;
     padding: 0 30px;
     display: flex;
     justify-content: space-between;
@@ -1511,7 +1463,6 @@ h3 {
     border-bottom: 2px solid #f0f0f0;
 }
 
-/* Botón Hamburguesa */
 .btn-icon-menu {
     background: transparent;
     border: none;
@@ -1530,7 +1481,6 @@ h3 {
     transform: scale(1.1);
 }
 
-/* Información Central (Misión + Timer) */
 .game-info-center {
     display: flex;
     flex-direction: column;
@@ -1562,7 +1512,6 @@ h3 {
     line-height: 1;
 }
 
-/* Contador de Movimientos (Derecha) */
 .score-badge {
     font-size: 1.1rem;
     color: #555;
@@ -1579,11 +1528,14 @@ h3 {
     color: var(--blue-dark);
 }
 
-/* --- 2. MENÚ LATERAL DESPLEGABLE (OVERLAY) --- */
+/* =========================================
+   14. MENÚ LATERAL
+   ========================================= */
+
 .menu-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); /* Fondo oscuro semitransparente */
+    background: rgba(0,0,0,0.5);
     z-index: 2000;
     opacity: 0;
     visibility: hidden;
@@ -1673,14 +1625,16 @@ h3 {
 .btn-back { background-color: var(--blue-primary); color: black;}
 .btn-cancel-game { background-color: var(--red-primary); color: black;}
 
+/* =========================================
+   15. TABLERO CENTRADO
+   ========================================= */
 
-/* --- 3. LAYOUT DEL TABLERO (CENTRADO) --- */
 .game-layout-centered {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center; 
-    padding-top: 90px; /* Espacio para el header */
+    padding-top: 90px;
     padding-bottom: 20px;
     height: 100vh;
     width: 100%;
@@ -1688,48 +1642,38 @@ h3 {
     background-color: #f4f6f8; 
 }
 
-/* Área de la Mesa (Contenedor del Puzzle) */
 .board-area {
-    /* Textura de mesa */
     background-color: #fdfbf7;
     background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
     background-size: 20px 20px;
-    
     padding: 20px;
     border-radius: 40px;
     border: 6px solid #fff;
     box-shadow: 
         0 20px 60px rgba(0,0,0,0.15),
         inset 0 0 50px rgba(0,0,0,0.02);
-    
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    
-    /* Dimensiones máximas */
     width: 95vw;
-    height: 85vh; /* Alto disponible */
+    height: 85vh;
     max-width: 1200px;
 }
 
-/* Espacio de Trabajo Dinámico */
 .game-workspace {
     position: relative;
-    /* Las dimensiones width/height las pone JS, pero CSS asegura límites */
     max-width: 100%;
     max-height: 100%;
     margin: auto; 
     box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     border-radius: 12px;
-    background-color: rgba(255,255,255,0.4); /* Fondo sutil */
+    background-color: rgba(255,255,255,0.4);
 }
 
-/* El Tablero (Grilla de Slots) */
 .puzzle-board {
     display: grid;
-    /* grid-template se define en JS */
     gap: 2px;
     background-color: rgba(255, 255, 255, 0.6);
     border: 4px solid var(--blue-primary);
@@ -1741,10 +1685,8 @@ h3 {
     overflow: hidden; 
 }
 
-/* Capa de Piezas Dispersas (Flotante) */
 .scattered-layer {
     position: absolute;
-    /* Permitir que las piezas sobresalgan un poco */
     top: -50px; left: -50px; 
     width: calc(100% + 100px); 
     height: calc(100% + 100px);
@@ -1753,8 +1695,10 @@ h3 {
 }
 .scattered-layer .puzzle-piece { pointer-events: auto; }
 
+/* =========================================
+   16. CONTROLES DEL JUEGO
+   ========================================= */
 
-/* --- 4. CONTROLES INFERIORES --- */
 .game-controls-bottom {
     display: flex;
     gap: 20px;
@@ -1765,7 +1709,6 @@ h3 {
     width: 100%;
 }
 
-/* Botón Comprobar */
 .btn-check {
     background-color: var(--green-primary);
     color: #1b5e20;
@@ -1781,7 +1724,6 @@ h3 {
 .btn-check:hover { transform: translateY(-4px); box-shadow: 0 10px 0 var(--green-dark); }
 .btn-check:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--green-dark); }
 
-/* Botón Ayuda (Inicialmente oculto) */
 .btn-help {
     background-color: black;
     color: var(--yellow-dark);
@@ -1800,10 +1742,10 @@ h3 {
 .btn-help:hover { background-color: #fffde7; transform: scale(1.05); }
 .btn-help.hidden { display: none; }
 
+/* =========================================
+   17. PIEZAS Y FEEDBACK
+   ========================================= */
 
-/* --- 5. ELEMENTOS DEL PUZZLE Y FEEDBACK --- */
-
-/* Drop Zone (Slot vacío) */
 .drop-zone {
     background: rgba(220, 220, 220, 0.3);
     border: 1px dashed rgba(0,0,0,0.15);
@@ -1817,13 +1759,9 @@ h3 {
     border: 2px solid var(--green-primary);
 }
 
-/* Pieza de Rompecabezas */
 .puzzle-piece {
-    /* Tamaño y BG definidos en JS */
     background-repeat: no-repeat;
-    /* Usa variables CSS para encajar la imagen globalmente */
     background-size: var(--board-width) var(--board-height);
-    
     cursor: grab;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     border-radius: 2px;
@@ -1834,7 +1772,6 @@ h3 {
     touch-action: none; 
 }
 
-/* Al arrastrar */
 .puzzle-piece.dragging {
     opacity: 0.9;
     z-index: 1000 !important;
@@ -1843,16 +1780,13 @@ h3 {
     cursor: grabbing;
 }
 
-/* === FEEDBACK MINIMALISTA === */
-
-/* Correcto: Borde verde fuerte, sin cambiar tamaño */
 .puzzle-piece.correct {
-    border: 3px solid #2ecc71 !important; /* Verde */
+    border: 3px solid #2ecc71 !important;
     box-shadow: none;
     z-index: 5;
-    pointer-events: none; /* Bloquear para que no se mueva más */
+    pointer-events: none;
 }
-/* Icono de Check */
+
 .puzzle-piece.correct::after {
     content: '✔';
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -1860,11 +1794,9 @@ h3 {
     text-shadow: 0 2px 4px rgba(0,0,0,0.5); pointer-events: none;
 }
 
-/* Incorrecto: Borde rojo simple */
 .puzzle-piece.incorrect {
-    border: 4px solid #e74c3c !important; /* Rojo */
+    border: 4px solid #e74c3c !important;
     z-index: 50;
-    /* Animación sutil de negación */
     animation: shake 0.4s;
 }
 .puzzle-piece.incorrect::after {
@@ -1874,7 +1806,6 @@ h3 {
     text-shadow: 2px 2px 0 #fff; pointer-events: none;
 }
 
-/* Pieza seleccionada para intercambio */
 .puzzle-piece.selected-for-swap {
     border: 4px solid #f39c12 !important;
     box-shadow: 0 0 15px rgba(243, 156, 18, 0.7);
@@ -1888,13 +1819,11 @@ h3 {
     text-shadow: 2px 2px 0 #fff; pointer-events: none;
 }
 
-/* Rotaciones CSS */
 .puzzle-piece[data-rotation="90"] { transform: rotate(90deg); }
 .puzzle-piece[data-rotation="180"] { transform: rotate(180deg); }
 .puzzle-piece[data-rotation="270"] { transform: rotate(270deg); }
 .puzzle-piece[data-rotation="0"] { transform: rotate(0deg); }
 
-/* Indicadores de Acción (Mano/Dedo) */
 .action-indicator {
     position: absolute;
     top: 50%; left: 50%;
@@ -1918,9 +1847,10 @@ h3 {
     width: 60px;
 }
 
-/* --- 6. ELEMENTOS FLOTANTES --- */
+/* =========================================
+   18. ELEMENTOS FLOTANTES Y MODALES
+   ========================================= */
 
-/* Mascota */
 .game-mascot {
     bottom: 20px; right: 20px;
     z-index: 200;
@@ -1929,7 +1859,6 @@ h3 {
 }
 .mascot-vector-container svg { width: 100%; height: 100%; overflow: visible; }
 
-/* Modal Victoria */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
@@ -1952,12 +1881,10 @@ h3 {
 
 .modal-actions { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
 
-/* --- ANIMACIONES --- */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px) rotate(-5deg); }
-    75% { transform: translateX(5px) rotate(5deg); }
-}
+/* =========================================
+   19. ANIMACIONES ADICIONALES
+   ========================================= */
+
 @keyframes pulse {
     0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.8; }
@@ -1979,7 +1906,10 @@ h3 {
     100% { transform: scale(1); }
 }
 
-/* --- RESPONSIVIDAD --- */
+/* =========================================
+   20. RESPONSIVIDAD PANTALLA DE JUEGO
+   ========================================= */
+
 @media (max-width: 900px) {
     .game-layout-centered { padding-top: 70px; }
     
@@ -1995,11 +1925,11 @@ h3 {
     
     .game-workspace { 
         width: 95%; 
-        aspect-ratio: 1/1; /* Cuadrado en móvil */
+        aspect-ratio: 1/1;
         max-height: 60vh;
     }
     
-    .game-controls-bottom { margin-bottom: 60px; /* Espacio para mascota */ }
+    .game-controls-bottom { margin-bottom: 60px; }
     
     .mascot-section { 
         transform: scale(0.6); 
@@ -2013,10 +1943,9 @@ h3 {
 }
 
 /* =========================================
-   ACCESSIBILITY STYLES (WCAG 2.1)
+   21. ESTILOS DE ACCESIBILIDAD (WCAG 2.1)
    ========================================= */
 
-/* Screen Reader Only Text */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2029,7 +1958,6 @@ h3 {
   border: 0;
 }
 
-/* Skip Link for Keyboard Navigation */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -2060,7 +1988,6 @@ h3 {
   outline-offset: 4px;
 }
 
-/* Form Help Text */
 .form-help {
   display: block;
   font-size: 0.9rem;
@@ -2070,7 +1997,6 @@ h3 {
   line-height: 1.5;
 }
 
-/* Error Message Styles */
 .error-message {
   display: none;
   color: #dc2626;
@@ -2087,7 +2013,6 @@ h3 {
   display: block;
 }
 
-/* Enhanced Focus Visible Styles for All Interactive Elements */
 *:focus-visible {
   outline: 3px solid #2563EB;
   outline-offset: 3px;
@@ -2095,7 +2020,6 @@ h3 {
   transition: outline 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Specific Focus Styles for Buttons */
 button:focus-visible,
 .btn:focus-visible,
 .btn-large:focus-visible,
@@ -2110,7 +2034,6 @@ button:focus-visible,
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Focus Styles for Links */
 a:focus-visible {
   outline: 3px solid #2563EB;
   outline-offset: 3px;
@@ -2119,7 +2042,6 @@ a:focus-visible {
   border-radius: 4px;
 }
 
-/* Focus Styles for Form Elements */
 input[type="radio"]:focus-visible,
 input[type="checkbox"]:focus-visible,
 input[type="text"]:focus-visible,
@@ -2131,7 +2053,6 @@ textarea:focus-visible {
   box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2);
 }
 
-/* Custom Radio Button Focus */
 .custom-radio input[type="radio"]:focus-visible + .radio-btn {
   outline: 3px solid #2563EB;
   outline-offset: 2px;
@@ -2139,7 +2060,6 @@ textarea:focus-visible {
   background-color: rgba(37, 99, 235, 0.1);
 }
 
-/* Image Card Focus (for selection.html) */
 .image-card:focus-visible {
   outline: 4px solid #2563EB;
   outline-offset: 4px;
@@ -2148,7 +2068,6 @@ textarea:focus-visible {
   background-color: rgba(37, 99, 235, 0.05);
 }
 
-/* Avatar Option Focus (for asistente.html) */
 .avatar-option:focus-visible {
   outline: 4px solid #2563EB;
   outline-offset: 4px;
@@ -2157,7 +2076,6 @@ textarea:focus-visible {
   background-color: rgba(37, 99, 235, 0.1);
 }
 
-/* Menu Items Focus */
 .btn-menu-item:focus-visible {
   outline: 3px solid #2563EB;
   outline-offset: 2px;
@@ -2165,7 +2083,6 @@ textarea:focus-visible {
   background-color: rgba(37, 99, 235, 0.1);
 }
 
-/* Navigation Elements Focus */
 nav button:focus-visible,
 nav a:focus-visible {
   outline: 3px solid #2563EB;
@@ -2173,7 +2090,6 @@ nav a:focus-visible {
   box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2);
 }
 
-/* Tabindex Content Focus (for text elements with tabindex) */
 [tabindex="0"]:focus-visible:not(button):not(a):not(input):not(select):not(textarea) {
   outline: 2px solid #2563EB;
   outline-offset: 2px;
@@ -2182,7 +2098,6 @@ nav a:focus-visible {
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-/* High Contrast Mode Support */
 @media (prefers-contrast: high) {
   *:focus-visible {
     outline-width: 4px;
@@ -2195,7 +2110,6 @@ nav a:focus-visible {
   }
 }
 
-/* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
   *:focus-visible {
     transition: none;
@@ -2213,9 +2127,10 @@ nav a:focus-visible {
   }
 }
 
-/* CORRECCIONES DE ACCESIBILIDAD - WAVE */
+/* =========================================
+   22. CORRECCIONES DE ACCESIBILIDAD - WAVE
+   ========================================= */
 
-/* Fix para título de ajustes que se desborda */
 .settings-title-fixed {
   position: relative !important;
   top: auto !important;
@@ -2226,13 +2141,11 @@ nav a:focus-visible {
   z-index: 5;
 }
 
-/* Fix para el grid de ajustes - evitar desbordamiento */
 .settings-grid-adjusted {
   margin-top: 20px !important;
   overflow: visible;
 }
 
-/* Mejoras de contraste - botones de tiempo */
 .group-time .radio-btn {
   color: #1a1a1a;
   font-weight: 700;
@@ -2243,7 +2156,6 @@ nav a:focus-visible {
   color: #1a1a1a;
 }
 
-/* Mejoras de contraste - botones de estímulos */
 .group-stimuli .radio-btn {
   color: #1a1a1a;
   font-weight: 700;
@@ -2254,7 +2166,6 @@ nav a:focus-visible {
   color: #1a1a1a;
 }
 
-/* Botón regresar en ajustes */
 .btn-back-settings {
   background: #6b7280;
   color: white;
@@ -2271,20 +2182,17 @@ nav a:focus-visible {
   box-shadow: 0 2px 0 #4b5563;
 }
 
-/* Mejor contraste para badges */
 #badge-time {
   background-color: #d97706;
   color: #ffffff;
 }
 
-/* Form help text mejor contraste */
 .form-help {
   color: #4b5563;
   font-size: 0.9rem;
   margin-bottom: 10px;
 }
 
-/* Screen reader announcer */
 #screen-reader-announcer {
   position: absolute;
   left: -10000px;
@@ -2293,7 +2201,6 @@ nav a:focus-visible {
   overflow: hidden;
 }
 
-/* Mejoras de contraste para step cards */
 .step-card h2 {
   font-size: 1.8rem;
   margin-bottom: 10px;
@@ -2310,7 +2217,6 @@ nav a:focus-visible {
   color: #92400e;
 }
 
-/* Mejoras para review items */
 .review-value {
   color: #1f2937;
   font-weight: 700;
@@ -2320,62 +2226,54 @@ nav a:focus-visible {
   color: #4b5563;
 }
 
-/* Contraste mejorado para header del juego */
 .game-header-bar h2 {
   color: #374151;
 }
 
 /* =========================================
-   CORRECCIONES DE CONTRASTE WCAG 2.0
+   23. CORRECCIONES DE CONTRASTE WCAG 2.0
    ========================================= */
 
-/* Título "Prepárate" en index.html y revision.html - Mejor contraste */
 .settings-title {
-  color: #B91C1C !important; /* Rojo más oscuro para mejor contraste */
+  color: #B91C1C !important;
   -webkit-text-stroke: 2px #7F1D1D !important;
   text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Título de instrucciones - Mejor contraste */
 #instructions-screen .settings-title {
   color: #B91C1C !important;
   -webkit-text-stroke: 2px #7F1D1D !important;
 }
 
-/* Título de asistente - Mejor contraste */
 #customize-screen .settings-title {
   color: #B91C1C !important;
   -webkit-text-stroke: 2px #7F1D1D !important;
 }
 
-/* Mejoras de contraste para botones no seleccionados en ajustes */
 .radio-btn {
-  color: #374151 !important; /* Gris oscuro en vez de #888 */
+  color: #374151 !important;
   font-weight: 700;
 }
 
-/* Vista previa título - mejor contraste */
 .settings-preview-panel h2,
 .settings-preview-panel h3 {
-  color: #374151 !important; /* Gris oscuro en vez de #aaa */
+  color: #374151 !important;
   font-weight: 700;
 }
 
-/* Botones de ajustes - texto más oscuro cuando no están seleccionados */
 .btn-small {
   font-weight: 700;
 }
 
 .btn-default {
-  color: #374151 !important; /* Mejor contraste */
+  color: #374151 !important;
 }
 
 .btn-assist {
-  color: #047857 !important; /* Verde más oscuro */
+  color: #047857 !important;
   border-color: #047857 !important;
 }
 
-/* Badges de vista previa - mejor contraste */
 #badge-difficulty {
   background-color: #DC2626 !important;
   color: #FFFFFF !important;
@@ -2386,14 +2284,12 @@ nav a:focus-visible {
   color: #FFFFFF !important;
 }
 
-/* Contraste mejorado para opciones del juego */
 .game-info-center h2 {
-  color: #374151 !important; /* Más oscuro para contraste */
+  color: #374151 !important;
 }
 
-/* Step cards en instrucciones - mejor contraste */
 .step-card h2 {
-  color: #1E40AF !important; /* Azul más oscuro */
+  color: #1E40AF !important;
 }
 
 .step-card.drag-step h2 {
@@ -2401,14 +2297,13 @@ nav a:focus-visible {
 }
 
 .step-card.rotate-step h2 {
-  color: #92400E !important; /* Marrón más oscuro */
+  color: #92400E !important;
 }
 
 /* =========================================
-   CORRECCIONES DE LAYOUT PARA AJUSTES
+   24. CORRECCIONES DE LAYOUT PARA AJUSTES
    ========================================= */
 
-/* Ajustar posición del título de ajustes */
 .settings-title-fixed {
   position: relative !important;
   top: auto !important;
@@ -2420,13 +2315,11 @@ nav a:focus-visible {
   z-index: 5;
 }
 
-/* Reducir tamaño del tablero de vista previa */
 .preview-card {
   width: 180px !important;
   height: 180px !important;
 }
 
-/* Ajustar grid de ajustes para mejor visualización */
 .settings-grid-layout {
   margin-top: 10px !important;
   padding: 30px !important;
@@ -2438,17 +2331,16 @@ nav a:focus-visible {
 }
 
 /* =========================================
-   ACCESIBILIDAD SCREEN READER - MENSAJE DEL ASISTENTE
+   25. ACCESIBILIDAD SCREEN READER - ASISTENTE
    ========================================= */
 
-/* Speech bubble accesible para screen readers */
 .speech-bubble-accessible {
   background: white;
   padding: 18px;
   border-radius: 25px;
   border: 4px solid var(--blue-primary);
   font-size: 1.1rem;
-  color: #1F2937; /* Color de texto más oscuro para contraste */
+  color: #1F2937;
   text-align: center;
   margin-bottom: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -2470,12 +2362,10 @@ nav a:focus-visible {
   border-color: var(--blue-primary) transparent transparent transparent;
 }
 
-/* Asegurar que el mensaje del asistente tenga buen contraste */
 .speech-bubble {
-  color: #1F2937 !important; /* Texto oscuro para mejor contraste */
+  color: #1F2937 !important;
 }
 
-/* Focus visible para el mensaje del asistente */
 .speech-bubble:focus-visible {
   outline: 3px solid #2563EB;
   outline-offset: 3px;
