@@ -63,22 +63,63 @@ document.addEventListener('DOMContentLoaded', () => {
         const thumb = document.getElementById('reference-thumb');
         const full = document.getElementById('reference-full');
         const btnReference = document.getElementById('btn-reference');
-        const dialog = document.getElementById('reference-dialog');
+        const overlay = document.getElementById('reference-overlay');
         const btnClose = document.getElementById('btn-reference-close');
-        if (!thumb || !full || !btnReference || !dialog) return;
+        if (!thumb || !full || !btnReference || !overlay || !btnClose) return;
 
         thumb.src = imageSrc;
         full.src = imageSrc;
 
-        btnReference.addEventListener('click', () => {
-            resetIdleTimer();
-            if (typeof dialog.showModal === 'function') dialog.showModal();
-            else dialog.setAttribute('open', '');
-            announceToScreenReader('Así debe quedar el rompecabezas.');
+        btnReference.addEventListener('click', openReference);
+        btnClose.addEventListener('click', closeReference);
+        // Tocar el fondo oscuro también cierra.
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeReference(); });
+
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.stopPropagation();
+                closeReference();
+            } else if (e.key === 'Tab') {
+                // Atrapa el foco: recorre solo los controles del diálogo.
+                const focusables = overlay.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (!Array.from(focusables).includes(document.activeElement)) {
+                    e.preventDefault();
+                    first.focus();
+                } else if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
         });
-        if (btnClose) btnClose.addEventListener('click', () => dialog.close());
-        // Tocar fuera de la imagen también cierra.
-        dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    }
+
+    function isReferenceOpen() {
+        const overlay = document.getElementById('reference-overlay');
+        return !!overlay && !overlay.classList.contains('hidden');
+    }
+
+    function openReference() {
+        const overlay = document.getElementById('reference-overlay');
+        if (!overlay || gameEnded) return;
+        resetIdleTimer();
+        overlay.classList.remove('hidden');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.getElementById('btn-reference-close').focus();
+        announceToScreenReader('Así debe quedar el rompecabezas.');
+    }
+
+    function closeReference(restoreFocus = true) {
+        const overlay = document.getElementById('reference-overlay');
+        if (!overlay || !isReferenceOpen()) return;
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden', 'true');
+        const btnReference = document.getElementById('btn-reference');
+        if (restoreFocus && btnReference) btnReference.focus();
     }
 
     // Puntaje (RF9): 100 puntos por pieza, menos 2 por movimiento, 1 por segundo y 20 por pista,
@@ -784,8 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (finalScoreDisplay) finalScoreDisplay.textContent = score;
         if (finalDifficultyDisplay) finalDifficultyDisplay.textContent = `${difficultyLabel} (${config.size} x ${config.size})`;
 
-        const referenceDialog = document.getElementById('reference-dialog');
-        if (referenceDialog && referenceDialog.open) referenceDialog.close();
+        closeReference(false);
 
         if(victoryModal) {
             victoryModal.classList.remove('hidden');

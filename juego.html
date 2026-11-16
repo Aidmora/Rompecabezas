@@ -199,11 +199,14 @@
         </div>
     </aside>
 
-    <dialog id="reference-dialog" class="reference-dialog" aria-labelledby="reference-title">
-        <h2 id="reference-title">Así debe quedar</h2>
-        <img id="reference-full" src="" alt="Imagen de referencia del rompecabezas completo">
-        <button id="btn-reference-close" class="btn btn-large btn-save" type="button">Cerrar</button>
-    </dialog>
+    <div id="reference-overlay" class="reference-overlay hidden" aria-hidden="true">
+        <div id="reference-dialog" class="reference-dialog" role="dialog" aria-modal="true"
+            aria-labelledby="reference-title" tabindex="-1">
+            <h2 id="reference-title">Así debe quedar</h2>
+            <img id="reference-full" src="" alt="Imagen de referencia del rompecabezas completo">
+            <button id="btn-reference-close" class="btn btn-large btn-save" type="button">Cerrar</button>
+        </div>
+    </div>
 
     <div id="victory-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title"
         aria-describedby="victory-description" aria-hidden="true">
