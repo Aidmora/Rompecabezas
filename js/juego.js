@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let moves = 0;
     let startTime;
     let timerInterval;
+    let hintsUsed = 0;
     let pointerState = null;
     let gameEnded = false;
     const DRAG_THRESHOLD = 10; // px que debe moverse el dedo para contar como arrastre y no como toque
@@ -45,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         imageSrc = localStorage.getItem('selectedPuzzleImage') || 'assets/images/perro.jpg'; 
 
+        setupReferenceImage();
+
         requestAnimationFrame(() => {
             setupBoardDimensions();
             generatePuzzle();
@@ -53,6 +56,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('resize', setupBoardDimensions);
+    }
+
+    // Imagen de referencia (RF6): miniatura siempre visible y vista ampliada en un diálogo.
+    function setupReferenceImage() {
+        const thumb = document.getElementById('reference-thumb');
+        const full = document.getElementById('reference-full');
+        const btnReference = document.getElementById('btn-reference');
+        const dialog = document.getElementById('reference-dialog');
+        const btnClose = document.getElementById('btn-reference-close');
+        if (!thumb || !full || !btnReference || !dialog) return;
+
+        thumb.src = imageSrc;
+        full.src = imageSrc;
+
+        btnReference.addEventListener('click', () => {
+            resetIdleTimer();
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+            announceToScreenReader('Así debe quedar el rompecabezas.');
+        });
+        if (btnClose) btnClose.addEventListener('click', () => dialog.close());
+        // Tocar fuera de la imagen también cierra.
+        dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    }
+
+    // Puntaje (RF9): 100 puntos por pieza, menos 2 por movimiento, 1 por segundo y 20 por pista,
+    // multiplicado según la dificultad. Nunca baja de 10 puntos por pieza.
+    function calculateScore(seconds) {
+        const multiplier = { easy: 1, medium: 1.5, hard: 2 }[config.difficulty] || 1;
+        const base = totalPieces * 100 - moves * 2 - seconds - hintsUsed * 20;
+        return Math.round(Math.max(totalPieces * 10, base) * multiplier);
     }
 
     function setupBoardDimensions() {
@@ -640,6 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(btnHelp) btnHelp.addEventListener('click', () => {
         const slots = document.querySelectorAll('.drop-zone');
+        hintsUsed++;
         let hintFound = false;
         let hintMessage = '';
 
@@ -741,6 +776,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if(finalTimeDisplay) finalTimeDisplay.textContent = timerDisplay.textContent;
         if(finalMovesDisplay) finalMovesDisplay.textContent = moves;
 
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        const score = calculateScore(seconds);
+        const difficultyLabel = { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' }[config.difficulty] || config.difficulty;
+        const finalScoreDisplay = document.getElementById('final-score');
+        const finalDifficultyDisplay = document.getElementById('final-difficulty');
+        if (finalScoreDisplay) finalScoreDisplay.textContent = score;
+        if (finalDifficultyDisplay) finalDifficultyDisplay.textContent = `${difficultyLabel} (${config.size} x ${config.size})`;
+
+        const referenceDialog = document.getElementById('reference-dialog');
+        if (referenceDialog && referenceDialog.open) referenceDialog.close();
+
         if(victoryModal) {
             victoryModal.classList.remove('hidden');
             victoryModal.setAttribute('aria-hidden', 'false');
@@ -751,7 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const victoryMessage = `¡Felicidades! Completaste el rompecabezas en ${timerDisplay.textContent} con ${moves} movimientos.`;
+        const victoryMessage = `¡Felicidades! Completaste el rompecabezas en ${timerDisplay.textContent} con ${moves} movimientos. Tu puntaje es ${score} puntos en dificultad ${difficultyLabel}.`;
         updateMascotMessage("¡Lo lograste! ¡Eres un campeón!");
         announceToScreenReader(victoryMessage);
     }
@@ -773,6 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = 'index.html');
+    const btnOtherImage = document.getElementById('btn-other-image');
+    if (btnOtherImage) btnOtherImage.addEventListener('click', () => window.location.href = 'seleccion.html');
     if (btnReplay) btnReplay.addEventListener('click', () => location.reload());
     
     if (btnPause) {

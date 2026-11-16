@@ -119,6 +119,11 @@
             </div>
 
             <div class="game-controls-bottom">
+                <button id="btn-reference" class="btn-reference" type="button" aria-haspopup="dialog"
+                    aria-label="Ver la imagen de referencia en grande">
+                    <img id="reference-thumb" src="" alt="">
+                    <span>Ver imagen</span>
+                </button>
                 <button id="btn-help" class="btn-help hidden" aria-label="Pedir pista">
                     <span aria-hidden="true">💡</span> Pista
                 </button>
@@ -194,6 +199,12 @@
         </div>
     </aside>
 
+    <dialog id="reference-dialog" class="reference-dialog" aria-labelledby="reference-title">
+        <h2 id="reference-title">Así debe quedar</h2>
+        <img id="reference-full" src="" alt="Imagen de referencia del rompecabezas completo">
+        <button id="btn-reference-close" class="btn btn-large btn-save" type="button">Cerrar</button>
+    </dialog>
+
     <div id="victory-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title"
         aria-describedby="victory-description" aria-hidden="true">
         <div class="modal-content">
@@ -202,10 +213,13 @@
             <div class="modal-stats" role="group" aria-label="Estadísticas del juego">
                 <p tabindex="0" id="stat-time">Tiempo: <span id="final-time">00:00</span></p>
                 <p tabindex="0" id="stat-moves">Movimientos: <span id="final-moves">0</span></p>
+                <p tabindex="0" id="stat-score">Puntaje: <span id="final-score">0</span></p>
+                <p tabindex="0" id="stat-difficulty">Dificultad: <span id="final-difficulty">Fácil</span></p>
             </div>
             <div class="modal-actions">
                 <button id="btn-replay" class="btn btn-large btn-save" aria-label="Jugar de nuevo">Jugar de
                     Nuevo</button>
+                <button id="btn-other-image" class="btn btn-large btn-primary">Elegir otra imagen</button>
                 <button id="btn-menu" class="btn btn-large btn-return" aria-label="Ir al menú principal">Menú
                     Principal</button>
             </div>
