@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rompecabezas - Jugando</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/juego.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
     <svg width="0" height="0" style="position: absolute; overflow: hidden;" aria-hidden="true">
         <defs>
             <linearGradient id="globalSuitGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -63,24 +63,25 @@
 
     <div class="bg-pattern" aria-hidden="true"></div>
 
-    <header class="game-header-bar" role="banner" aria-hidden="true">
+    <header class="game-header-bar" role="banner">
         <h1 class="sr-only">Tablero del Rompecabezas</h1>
 
         <button id="btn-menu-toggle" class="btn-icon-menu" aria-label="Abrir menú de opciones" aria-expanded="false">
             <span class="hamburger-icon" style="font-size: 2rem;" aria-hidden="true">☰</span>
         </button>
 
-        <div class="game-info-center" aria-hidden="true">
+        <div class="game-info-center">
             <h2 id="game-instruction" style="margin:0; font-size:1rem; color:#666; text-transform:uppercase;">Misión
             </h2>
-            <div class="timer-badge" aria-hidden="true">
+            <div class="timer-badge">
                 <span class="icon" aria-hidden="true">⏱️</span>
+                <span class="sr-only">Tiempo:</span>
                 <span id="timer">00:00</span>
             </div>
         </div>
 
-        <div class="score-badge" aria-hidden="true">
-            <span>Movs:</span> <strong id="move-count">0</strong>
+        <div class="score-badge">
+            <span aria-hidden="true">Movs:</span><span class="sr-only">Movimientos:</span> <strong id="move-count">0</strong>
         </div>
     </header>
 
@@ -213,7 +214,7 @@
 
     <div id="screen-reader-announcer" class="sr-only" role="status" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="/js/juego.js"></script>
+    <script src="js/juego.js"></script>
 </body>
 
 </html>

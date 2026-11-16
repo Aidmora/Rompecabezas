@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rompecabezas - Selección de Imagen</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <a href="#contenido-principal" class="skip-link">Saltar al contenido principal</a>
 
     <svg width="0" height="0" style="position: absolute; overflow: hidden;" aria-hidden="true">
         <defs>
@@ -81,9 +82,9 @@
         <section class="selection-grid" aria-labelledby="titulo-galeria">
             <h2 id="titulo-galeria" class="sr-only">Galería de imágenes disponibles</h2>
 
-            <button class="image-card" data-img-url="../assets/images/perro.jpg" aria-label="Imagen de un perrito"
+            <button class="image-card" data-img-url="assets/images/perro.jpg" aria-label="Imagen de un perrito"
                 aria-pressed="false">
-                <img src="../assets/images/perro.jpg" alt="Perrito" loading="lazy">
+                <img src="assets/images/perro.jpg" alt="Perrito" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -92,9 +93,9 @@
                 <div class="card-label">Perrito</div>
             </button>
 
-            <button class="image-card" data-img-url="../assets/images/gato.jpg" aria-label="Imagen de un gatito"
+            <button class="image-card" data-img-url="assets/images/gato.jpg" aria-label="Imagen de un gatito"
                 aria-pressed="false">
-                <img src="../assets/images/gato.jpg" alt="Gatito" loading="lazy">
+                <img src="assets/images/gato.jpg" alt="Gatito" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -103,9 +104,9 @@
                 <div class="card-label">Gatito</div>
             </button>
 
-            <button class="image-card" data-img-url="../assets/images/paisaje.jpg" aria-label="Imagen de un paisaje"
+            <button class="image-card" data-img-url="assets/images/paisaje.jpg" aria-label="Imagen de un paisaje"
                 aria-pressed="false">
-                <img src="../assets/images/paisaje.jpg" alt="Paisaje" loading="lazy">
+                <img src="assets/images/paisaje.jpg" alt="Paisaje" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -114,9 +115,9 @@
                 <div class="card-label">Paisaje</div>
             </button>
 
-            <button class="image-card" data-img-url="../assets/images/numeros.png" aria-label="Imagen de números"
+            <button class="image-card" data-img-url="assets/images/numeros.png" aria-label="Imagen de números"
                 aria-pressed="false">
-                <img src="../assets/images/numeros.png" alt="Números" loading="lazy">
+                <img src="assets/images/numeros.png" alt="Números" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -125,9 +126,9 @@
                 <div class="card-label">Números</div>
             </button>
 
-            <button class="image-card" data-img-url="../assets/images/colores.jpg" aria-label="Imagen de colores"
+            <button class="image-card" data-img-url="assets/images/colores.jpg" aria-label="Imagen de colores"
                 aria-pressed="false">
-                <img src="../assets/images/colores.jpg" alt="Colores" loading="lazy">
+                <img src="assets/images/colores.jpg" alt="Colores" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -136,9 +137,9 @@
                 <div class="card-label">Colores</div>
             </button>
 
-            <button class="image-card" data-img-url="../assets/images/heroe.jpg" aria-label="Imagen de un héroe"
+            <button class="image-card" data-img-url="assets/images/heroe.jpg" aria-label="Imagen de un héroe"
                 aria-pressed="false">
-                <img src="../assets/images/heroe.jpg" alt="Héroe" loading="lazy">
+                <img src="assets/images/heroe.jpg" alt="Héroe" loading="lazy">
                 <div class="selection-overlay" aria-hidden="true">
                     <svg class="check-icon" aria-hidden="true">
                         <use xlink:href="#icon-check"></use>
@@ -223,7 +224,7 @@
         </div>
     </aside>
 
-    <script src="/js/seleccion.js"></script>
+    <script src="js/seleccion.js"></script>
 </body>
 
 </html>

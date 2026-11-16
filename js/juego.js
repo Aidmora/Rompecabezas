@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedConfig = localStorage.getItem('puzzleConfig');
         if (savedConfig) config = JSON.parse(savedConfig);
         
-        imageSrc = localStorage.getItem('selectedPuzzleImage') || '../assets/images/perro.jpg'; 
+        imageSrc = localStorage.getItem('selectedPuzzleImage') || 'assets/images/perro.jpg'; 
 
         requestAnimationFrame(() => {
             setupBoardDimensions();
@@ -178,7 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (config.difficulty === 'medium' || config.difficulty === 'hard') {
-            piecesArray.sort(() => Math.random() - 0.5);
+            // Fisher–Yates: barajado uniforme. Se repite si el tablero queda ya resuelto.
+            const isSolved = () => piecesArray.every((p, idx) => parseInt(p.dataset.correctIndex) === idx);
+            do {
+                for (let i = piecesArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [piecesArray[i], piecesArray[j]] = [piecesArray[j], piecesArray[i]];
+                }
+            } while (piecesArray.length > 1 && isSolved());
 
             piecesArray.forEach((piece, index) => {
                 const slot = boardElement.children[index];
@@ -641,17 +648,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedAvatar && mascotContainer) mascotContainer.innerHTML = savedAvatar;
     }
 
-    if (btnBackMenu) btnBackMenu.addEventListener('click', () => window.location.href = '../revision.html');
+    if (btnBackMenu) btnBackMenu.addEventListener('click', () => window.location.href = 'revision.html');
     
     if (btnCancelGame) {
         btnCancelGame.addEventListener('click', () => {
             if (confirm("¿Salir al menú principal? Perderás el progreso.")) {
-                window.location.href = '../index.html';
+                window.location.href = 'index.html';
             }
         });
     }
     
-    if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = '../index.html');
+    if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = 'index.html');
     if (btnReplay) btnReplay.addEventListener('click', () => location.reload());
     
     if (btnPause) {
