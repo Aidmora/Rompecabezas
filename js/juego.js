@@ -26,7 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let moves = 0;
     let startTime;
     let timerInterval;
-    let draggedPiece = null;
+    let pointerState = null;
+    let gameEnded = false;
+    const DRAG_THRESHOLD = 10; // px que debe moverse el dedo para contar como arrastre y no como toque
+    const CAN_DRAG = () => config.difficulty !== 'easy';
+    const CAN_ROTATE = () => config.difficulty !== 'medium';
     let selectedPieceForSwap = null;
     let totalPieces = 0;
     let idleTimer;
@@ -102,13 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const slot = document.createElement('div');
             slot.classList.add('drop-zone');
             slot.dataset.index = i;
-            
-            if (config.difficulty !== 'easy') {
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('drop', handleDrop);
-                slot.addEventListener('dragenter', () => slot.classList.add('hovered'));
-                slot.addEventListener('dragleave', () => slot.classList.remove('hovered'));
-            }
             boardElement.appendChild(slot);
         }
 
@@ -132,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 piece.style.transform = `rotate(${randomRot}deg)`;
 
                 piece.classList.add('clickable');
-                piece.addEventListener('click', handleRotateClick);
+                enablePointerControls(piece);
 
                 piece.setAttribute('tabindex', '0');
                 piece.setAttribute('role', 'button');
@@ -145,8 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             else if (config.difficulty === 'medium') {
                 piece.dataset.currentRotation = 0;
-                piece.draggable = true;
-                piece.addEventListener('dragstart', handleDragStart);
+                enablePointerControls(piece);
 
                 piece.setAttribute('tabindex', '0');
                 piece.setAttribute('role', 'button');
@@ -161,10 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 piece.dataset.currentRotation = randomRot;
                 piece.style.transform = `rotate(${randomRot}deg)`;
 
-                piece.draggable = true;
                 piece.classList.add('clickable');
-                piece.addEventListener('dragstart', handleDragStart);
-                piece.addEventListener('click', handleRotateClick);
+                enablePointerControls(piece);
 
                 piece.setAttribute('tabindex', '0');
                 piece.setAttribute('role', 'button');
@@ -196,11 +190,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Las piezas que ya empiezan bien colocadas quedan marcadas desde el inicio.
+        document.querySelectorAll('.puzzle-piece').forEach(p => validatePiece(p, false));
     }
 
     function updatePieceAriaLabel(piece, slotIndex, rotation) {
         const pieceNumber = slotIndex + 1;
         const positionText = `Pieza ${pieceNumber}`;
+
+        if (piece.classList.contains('correct')) {
+            piece.setAttribute('aria-label', `${positionText}, colocada correctamente`);
+            return;
+        }
 
         let stateText = '';
         if (config.difficulty === 'easy' || config.difficulty === 'hard') {
@@ -281,8 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleRotateClick(e) {
-        const piece = e.currentTarget || e.target;
-        if (piece.classList.contains('dragging')) return;
+        rotatePiece(e.currentTarget || e.target);
+    }
+
+    function rotatePiece(piece) {
+        if (gameEnded || piece.classList.contains('dragging')) return;
+        if (piece.classList.contains('correct')) {
+            announceToScreenReader('Esta pieza ya está en su lugar.');
+            return;
+        }
 
         resetIdleTimer();
         const cue = piece.querySelector('.action-indicator');
@@ -298,12 +307,187 @@ document.addEventListener('DOMContentLoaded', () => {
         moves++;
         updateStatsWithoutAnnounce();
 
-        const slot = piece.parentElement;
-        const slotIndex = slot ? parseInt(slot.dataset.index) : 0;
-        updatePieceAriaLabel(piece, slotIndex, currentRot);
+        // Validación inmediata: girar nunca muestra equis, solo confirma el acierto.
+        if (validatePiece(piece, false) === 'correct') {
+            giveFeedback('¡Muy bien! Esa pieza está en su lugar.');
+            checkCompletion();
+        } else {
+            const rotationText = currentRot === 0 ? 'orientación correcta' : `rotada ${currentRot} grados`;
+            announceToScreenReader(`Pieza girada, ${rotationText}`);
+        }
+    }
 
-        const rotationText = currentRot === 0 ? 'orientación correcta' : `rotada ${currentRot} grados`;
-        announceToScreenReader(`Pieza girada, ${rotationText}`);
+    // Comprueba posición y orientación de una pieza y la marca al instante.
+    // Devuelve 'correct', 'rotate' (lugar correcto, falta girar) o 'wrong'.
+    function validatePiece(piece, showError) {
+        const slot = piece.parentElement;
+        const slotIndex = parseInt(slot.dataset.index);
+        const rot = parseInt(piece.dataset.currentRotation) || 0;
+        const inPlace = parseInt(piece.dataset.correctIndex) === slotIndex;
+        let result;
+
+        piece.classList.remove('correct', 'incorrect');
+
+        if (inPlace && rot === 0) {
+            piece.classList.add('correct');
+            result = 'correct';
+        } else if (inPlace) {
+            result = 'rotate';
+        } else {
+            if (showError) {
+                piece.classList.add('incorrect');
+                setTimeout(() => piece.classList.remove('incorrect'), 1200);
+            }
+            result = 'wrong';
+        }
+
+        updatePieceAriaLabel(piece, slotIndex, rot);
+        return result;
+    }
+
+    function giveFeedback(message) {
+        updateMascotMessage(message);
+        announceToScreenReader(message);
+    }
+
+    function checkCompletion() {
+        if (gameEnded) return;
+        const allPieces = document.querySelectorAll('.puzzle-piece');
+        if (Array.from(allPieces).every(p => p.classList.contains('correct'))) {
+            gameEnded = true;
+            setTimeout(endGame, 700);
+        }
+    }
+
+    // Mueve una pieza a una casilla (intercambiando si está ocupada) y la valida.
+    function movePieceToSlot(piece, targetSlot) {
+        const originSlot = piece.parentElement;
+        const other = targetSlot.children[0];
+
+        if (other && other.classList.contains('correct')) {
+            giveFeedback('Esa pieza ya está en su lugar. ¡Prueba otro espacio!');
+            return false;
+        }
+
+        if (other) {
+            originSlot.appendChild(other);
+            resetPieceStyle(other);
+        }
+        targetSlot.appendChild(piece);
+        resetPieceStyle(piece);
+
+        moves++;
+        updateStatsWithoutAnnounce();
+        resetIdleTimer();
+
+        if (other) validatePiece(other, false);
+        const result = validatePiece(piece, true);
+
+        if (result === 'correct') giveFeedback('¡Muy bien! Esa pieza está en su lugar.');
+        else if (result === 'rotate') giveFeedback('¡Casi! Ahora gírala para que encaje.');
+        else giveFeedback('Esa pieza no va ahí. ¡Prueba otro lugar!');
+
+        checkCompletion();
+        return true;
+    }
+
+    // --- Arrastre y toque con Pointer Events (ratón, dedo y lápiz) ---
+
+    function enablePointerControls(piece) {
+        piece.addEventListener('pointerdown', handlePointerDown);
+        piece.addEventListener('pointermove', handlePointerMove);
+        piece.addEventListener('pointerup', handlePointerUp);
+        piece.addEventListener('pointercancel', handlePointerCancel);
+        piece.addEventListener('dragstart', (e) => e.preventDefault());
+    }
+
+    function setPieceTransform(piece, dx = 0, dy = 0) {
+        const rot = parseInt(piece.dataset.currentRotation) || 0;
+        const move = (dx || dy) ? `translate(${dx}px, ${dy}px) ` : '';
+        piece.style.transform = `${move}rotate(${rot}deg)`;
+    }
+
+    function slotAtPoint(x, y) {
+        return Array.from(boardElement.children).find(slot => {
+            const r = slot.getBoundingClientRect();
+            return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+        }) || null;
+    }
+
+    function setHoveredSlot(slot) {
+        if (pointerState.hoverSlot === slot) return;
+        if (pointerState.hoverSlot) pointerState.hoverSlot.classList.remove('hovered');
+        if (slot) slot.classList.add('hovered');
+        pointerState.hoverSlot = slot;
+    }
+
+    function handlePointerDown(e) {
+        if (pointerState || gameEnded) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        const piece = e.currentTarget;
+        if (piece.classList.contains('correct')) return;
+
+        pointerState = {
+            piece,
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            startY: e.clientY,
+            dragging: false,
+            hoverSlot: null
+        };
+        piece.setPointerCapture(e.pointerId);
+        resetIdleTimer();
+
+        const cue = piece.querySelector('.action-indicator');
+        if (cue) cue.remove();
+    }
+
+    function handlePointerMove(e) {
+        if (!pointerState || e.pointerId !== pointerState.pointerId) return;
+        const { piece, startX, startY } = pointerState;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        if (!pointerState.dragging) {
+            if (!CAN_DRAG() || Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+            pointerState.dragging = true;
+            piece.classList.add('dragging');
+            piece.style.transition = 'none';
+        }
+
+        e.preventDefault();
+        setPieceTransform(piece, dx, dy);
+        const slot = slotAtPoint(e.clientX, e.clientY);
+        setHoveredSlot(slot && slot !== piece.parentElement ? slot : null);
+    }
+
+    function handlePointerUp(e) {
+        if (!pointerState || e.pointerId !== pointerState.pointerId) return;
+        const { piece, dragging } = pointerState;
+        const target = dragging ? slotAtPoint(e.clientX, e.clientY) : null;
+        endPointerInteraction();
+
+        if (dragging) {
+            if (target && target !== piece.parentElement) movePieceToSlot(piece, target);
+        } else if (CAN_ROTATE()) {
+            rotatePiece(piece);
+        }
+    }
+
+    function handlePointerCancel(e) {
+        if (!pointerState || e.pointerId !== pointerState.pointerId) return;
+        endPointerInteraction();
+    }
+
+    function endPointerInteraction() {
+        const { piece, pointerId } = pointerState;
+        setHoveredSlot(null);
+        if (piece.hasPointerCapture(pointerId)) piece.releasePointerCapture(pointerId);
+        piece.classList.remove('dragging');
+        piece.style.transition = '';
+        setPieceTransform(piece);
+        pointerState = null;
     }
 
     function handleKeyboardRotate(e) {
@@ -328,7 +512,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentSlot = currentPiece.parentElement;
         if (!currentSlot || !currentSlot.classList.contains('drop-zone')) return;
 
-        if (!selectedPieceForSwap) {
+        if (!selectedPieceForSwap && currentPiece.classList.contains('correct')) {
+            announceToScreenReader('Esta pieza ya está en su lugar.');
+        } else if (!selectedPieceForSwap) {
             selectedPieceForSwap = currentPiece;
             currentPiece.classList.add('selected-for-swap');
             const currentIndex = parseInt(currentSlot.dataset.index) + 1;
@@ -339,28 +525,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentIndex = parseInt(currentSlot.dataset.index) + 1;
             announceToScreenReader(`Pieza ${currentIndex} deseleccionada.`);
         } else {
-            const selectedSlot = selectedPieceForSwap.parentElement;
-            const selectedIndex = parseInt(selectedSlot.dataset.index);
-            const currentIndex = parseInt(currentSlot.dataset.index);
-
-            currentSlot.appendChild(selectedPieceForSwap);
-            selectedSlot.appendChild(currentPiece);
-
-            const selectedRot = parseInt(selectedPieceForSwap.dataset.currentRotation);
-            const currentRot = parseInt(currentPiece.dataset.currentRotation);
-            updatePieceAriaLabel(selectedPieceForSwap, currentIndex, selectedRot);
-            updatePieceAriaLabel(currentPiece, selectedIndex, currentRot);
-
-            selectedPieceForSwap.classList.remove('selected-for-swap');
+            const selected = selectedPieceForSwap;
+            selected.classList.remove('selected-for-swap');
             selectedPieceForSwap = null;
 
-            moves++;
-            updateStatsWithoutAnnounce();
-            resetIdleTimer();
-
-            announceToScreenReader(`Piezas intercambiadas. Ahora estás en pieza ${currentIndex + 1}.`);
-
-            currentSlot.children[0].focus();
+            if (movePieceToSlot(selected, currentSlot)) {
+                currentSlot.children[0].focus();
+            }
         }
     }
 
@@ -386,66 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
             utterance.rate = 1.0;
             utterance.pitch = 1.0;
             window.speechSynthesis.speak(utterance);
-        }
-    }
-
-    function handleDragStart(e) {
-        draggedPiece = e.target;
-        resetIdleTimer();
-        
-        const cue = draggedPiece.querySelector('.action-indicator');
-        if(cue) cue.remove();
-
-        e.dataTransfer.setData('text/plain', ''); 
-        setTimeout(() => e.target.classList.add('dragging'), 0);
-    }
-
-    document.addEventListener('dragend', (e) => {
-        if (draggedPiece) {
-            draggedPiece.classList.remove('dragging');
-            draggedPiece = null;
-        }
-    });
-
-    function handleDragOver(e) { e.preventDefault(); }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        const slot = e.target.closest('.drop-zone');
-        if(slot) slot.classList.remove('hovered');
-
-        if (slot && draggedPiece) {
-            const originalParent = draggedPiece.parentElement;
-            const originalIndex = originalParent ? parseInt(originalParent.dataset.index) : -1;
-            const newIndex = parseInt(slot.dataset.index);
-
-            if (slot.children.length > 0) {
-                const existingPiece = slot.children[0];
-
-                if (originalParent) {
-                    originalParent.appendChild(existingPiece);
-                    resetPieceStyle(existingPiece);
-                    const existingRot = parseInt(existingPiece.dataset.currentRotation);
-                    updatePieceAriaLabel(existingPiece, originalIndex, existingRot);
-                }
-
-                slot.appendChild(draggedPiece);
-                resetPieceStyle(draggedPiece);
-
-            } else {
-                slot.appendChild(draggedPiece);
-                resetPieceStyle(draggedPiece);
-            }
-
-            const draggedRot = parseInt(draggedPiece.dataset.currentRotation);
-            updatePieceAriaLabel(draggedPiece, newIndex, draggedRot);
-
-            moves++;
-            updateStatsWithoutAnnounce();
-            resetIdleTimer();
-
-            const pieceNumber = newIndex + 1;
-            announceToScreenReader(`Pieza movida a posición ${pieceNumber}`);
         }
     }
 
@@ -512,7 +623,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (correctCount === totalPieces) {
-            endGame();
+            if (!gameEnded) {
+                gameEnded = true;
+                endGame();
+            }
         } else {
             const incorrectCount = totalPieces - correctCount;
             updateMascotMessage(`Hay ${incorrectCount} pieza${incorrectCount > 1 ? 's' : ''} incorrecta${incorrectCount > 1 ? 's' : ''}. ¡Sigue intentando!`);
