@@ -2402,7 +2402,8 @@ nav a:focus-visible {
     display: block;
 }
 
-.reference-overlay {
+.reference-overlay,
+.game-overlay {
     position: fixed;
     inset: 0;
     display: flex;
@@ -2413,11 +2414,39 @@ nav a:focus-visible {
     z-index: 2000;
 }
 
-.reference-overlay.hidden {
+.reference-overlay.hidden,
+.game-overlay.hidden {
     display: none;
 }
 
-.reference-dialog {
+.game-dialog h2 {
+    margin: 0 0 12px;
+}
+
+.game-dialog p {
+    font-size: 1.2rem;
+    margin: 0 0 16px;
+}
+
+/* Aviso de poco tiempo: cambia color y además late, para no depender solo del color */
+.timer-badge.timer-warning {
+    background: #fde68a;
+    color: #7c2d12;
+    outline: 3px solid #b45309;
+    animation: timerPulse 1s infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timer-badge.timer-warning { animation: none; }
+}
+
+.reference-dialog,
+.game-dialog {
     border: 4px solid var(--blue-primary);
     border-radius: 20px;
     padding: 20px;

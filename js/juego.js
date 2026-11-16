@@ -24,7 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let config = { size: 3, difficulty: 'easy', time: 'free', stimuli: 'visual' };
     let imageSrc = '';
     let moves = 0;
-    let startTime;
+    // Cronómetro: tiempo acumulado que solo avanza mientras el juego está en marcha.
+    let elapsedMs = 0;
+    let lastTick = null;      // null = cronómetro detenido
+    let timeLimit = null;     // segundos; null = modo libre
+    let warningShown = false;
+    let isPaused = false;
+    const WARNING_SECONDS = 30;
     let timerInterval;
     let hintsUsed = 0;
     let pointerState = null;
@@ -75,12 +81,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Tocar el fondo oscuro también cierra.
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeReference(); });
 
+        trapModalKeys(overlay, closeReference);
+    }
+
+    // Patrón común de los modales: Escape ejecuta onEscape (si existe) y Tab no sale del diálogo.
+    function trapModalKeys(overlay, onEscape) {
         overlay.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 e.stopPropagation();
-                closeReference();
+                if (onEscape) onEscape();
             } else if (e.key === 'Tab') {
-                // Atrapa el foco: recorre solo los controles del diálogo.
                 const focusables = overlay.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
                 const first = focusables[0];
                 const last = focusables[focusables.length - 1];
@@ -96,6 +106,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    }
+
+    function showOverlay(overlay, focusTarget) {
+        overlay.classList.remove('hidden');
+        overlay.setAttribute('aria-hidden', 'false');
+        if (focusTarget) focusTarget.focus();
+    }
+
+    function hideOverlay(overlay) {
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    // --- Pausa: congela el cronómetro y muestra un modal accesible ---
+
+    const pauseOverlay = document.getElementById('pause-overlay');
+    const btnResume = document.getElementById('btn-resume');
+    if (pauseOverlay && btnResume) {
+        btnResume.addEventListener('click', resumeGame);
+        trapModalKeys(pauseOverlay, resumeGame);
+    }
+
+    function pauseGame() {
+        if (isPaused || gameEnded || !pauseOverlay) return;
+        isPaused = true;
+        stopTimer();
+        clearTimeout(idleTimer);
+        closeReference(false);
+        if (!sideMenuOverlay.classList.contains('hidden')) closeSideMenu();
+        showOverlay(pauseOverlay, btnResume);
+        announceToScreenReader('Juego en pausa. El tiempo está detenido.');
+    }
+
+    function resumeGame() {
+        if (!isPaused) return;
+        isPaused = false;
+        hideOverlay(pauseOverlay);
+        if (btnMenuToggle) btnMenuToggle.focus();
+        startTimer();
+        resetIdleTimer();
+        announceToScreenReader('¡Seguimos jugando!');
+    }
+
+    // --- Tiempo agotado (modo cronometrado) ---
+
+    const timeoutOverlay = document.getElementById('timeout-overlay');
+    const btnTimeoutRetry = document.getElementById('btn-timeout-retry');
+    const btnTimeoutMenu = document.getElementById('btn-timeout-menu');
+    if (timeoutOverlay) trapModalKeys(timeoutOverlay, null);
+    if (btnTimeoutRetry) btnTimeoutRetry.addEventListener('click', () => location.reload());
+    if (btnTimeoutMenu) btnTimeoutMenu.addEventListener('click', () => window.location.href = 'index.html');
+
+    function handleTimeUp() {
+        if (gameEnded) return;
+        gameEnded = true;
+        stopTimer();
+        clearTimeout(idleTimer);
+        if (pointerState) endPointerInteraction();
+        closeReference(false);
+        if (!sideMenuOverlay.classList.contains('hidden')) closeSideMenu();
+
+        const placed = document.querySelectorAll('.puzzle-piece.correct').length;
+        const summary = `Colocaste ${placed} de ${totalPieces} piezas. ¡Buen trabajo!`;
+        const summaryEl = document.getElementById('timeout-summary');
+        if (summaryEl) summaryEl.textContent = summary;
+
+        if (timeoutOverlay) showOverlay(timeoutOverlay, btnTimeoutRetry);
+        updateMascotMessage('¡Se acabó el tiempo! Lo hiciste muy bien.');
+        announceToScreenReader(`Se acabó el tiempo. ${summary} ¿Quieres intentarlo otra vez?`);
     }
 
     function isReferenceOpen() {
@@ -802,22 +881,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function formatTime(totalSeconds) {
+        const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const secs = (totalSeconds % 60).toString().padStart(2, '0');
+        return `${mins}:${secs}`;
+    }
+
+    function elapsedSeconds() {
+        return Math.floor(elapsedMs / 1000);
+    }
+
+    // Inicia o reanuda el cronómetro. Solo suma el tiempo entre ticks mientras está en marcha,
+    // así que el rato en pausa no cuenta.
     function startTimer() {
-        startTime = Date.now();
-        timerInterval = setInterval(() => {
-            const delta = Math.floor((Date.now() - startTime) / 1000);
-            const mins = Math.floor(delta / 60).toString().padStart(2, '0');
-            const secs = (delta % 60).toString().padStart(2, '0');
-            if(timerDisplay) timerDisplay.textContent = `${mins}:${secs}`;
-        }, 1000);
+        if (lastTick !== null) return;
+        timeLimit = { '3min': 180, '5min': 300 }[config.time] || null;
+        lastTick = Date.now();
+        timerInterval = setInterval(tickTimer, 250);
+        renderTimer();
+    }
+
+    function stopTimer() {
+        if (lastTick === null) return;
+        elapsedMs += Date.now() - lastTick;
+        lastTick = null;
+        clearInterval(timerInterval);
+        renderTimer();
+    }
+
+    function tickTimer() {
+        const now = Date.now();
+        elapsedMs += now - lastTick;
+        lastTick = now;
+        renderTimer();
+
+        if (timeLimit === null || gameEnded) return;
+        const remaining = timeLimit - elapsedSeconds();
+
+        if (remaining <= 0) {
+            handleTimeUp();
+        } else if (remaining <= WARNING_SECONDS && !warningShown) {
+            warningShown = true;
+            const badge = timerDisplay ? timerDisplay.closest('.timer-badge') : null;
+            if (badge) badge.classList.add('timer-warning');
+            giveFeedback(`¡Quedan ${WARNING_SECONDS} segundos! Tú puedes.`);
+        }
+    }
+
+    // Modo libre: cuenta hacia arriba. Modo cronometrado: cuenta hacia atrás.
+    function renderTimer() {
+        if (!timerDisplay) return;
+        const shown = timeLimit === null
+            ? elapsedSeconds()
+            : Math.max(0, timeLimit - elapsedSeconds());
+        timerDisplay.textContent = formatTime(shown);
     }
 
     function endGame() {
-        clearInterval(timerInterval);
-        if(finalTimeDisplay) finalTimeDisplay.textContent = timerDisplay.textContent;
+        stopTimer();
+        clearTimeout(idleTimer);
+        const seconds = elapsedSeconds();
+        const finalTime = formatTime(seconds);
+        if(finalTimeDisplay) finalTimeDisplay.textContent = finalTime;
         if(finalMovesDisplay) finalMovesDisplay.textContent = moves;
 
-        const seconds = Math.floor((Date.now() - startTime) / 1000);
         const score = calculateScore(seconds);
         const difficultyLabel = { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' }[config.difficulty] || config.difficulty;
         const finalScoreDisplay = document.getElementById('final-score');
@@ -837,7 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const victoryMessage = `¡Felicidades! Completaste el rompecabezas en ${timerDisplay.textContent} con ${moves} movimientos. Tu puntaje es ${score} puntos en dificultad ${difficultyLabel}.`;
+        const victoryMessage = `¡Felicidades! Completaste el rompecabezas en ${finalTime} con ${moves} movimientos. Tu puntaje es ${score} puntos en dificultad ${difficultyLabel}.`;
         updateMascotMessage("¡Lo lograste! ¡Eres un campeón!");
         announceToScreenReader(victoryMessage);
     }
@@ -864,10 +991,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnReplay) btnReplay.addEventListener('click', () => location.reload());
     
     if (btnPause) {
-        btnPause.addEventListener('click', () => {
-            announceToScreenReader("Juego pausado");
-            alert("Juego Pausado. Pulsa Aceptar para continuar.");
-            sideMenuOverlay.classList.add('hidden');
-        });
+        btnPause.addEventListener('click', pauseGame);
     }
 });

@@ -208,6 +208,30 @@
         </div>
     </div>
 
+    <div id="pause-overlay" class="game-overlay hidden" aria-hidden="true">
+        <div class="game-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"
+            aria-describedby="pause-description" tabindex="-1">
+            <h2 id="pause-title"><span aria-hidden="true">⏸️</span> Juego en pausa</h2>
+            <p id="pause-description">El tiempo está detenido. Descansa y sigue cuando quieras.</p>
+            <button id="btn-resume" class="btn btn-large btn-save" type="button">Continuar</button>
+        </div>
+    </div>
+
+    <div id="timeout-overlay" class="game-overlay hidden" aria-hidden="true">
+        <div class="game-dialog" role="dialog" aria-modal="true" aria-labelledby="timeout-title"
+            aria-describedby="timeout-description" tabindex="-1">
+            <h2 id="timeout-title"><span aria-hidden="true">⏰</span> ¡Se acabó el tiempo!</h2>
+            <p id="timeout-description">
+                <span id="timeout-summary">¡Buen trabajo!</span>
+                ¿Quieres intentarlo otra vez?
+            </p>
+            <div class="modal-actions">
+                <button id="btn-timeout-retry" class="btn btn-large btn-save" type="button">Reintentar</button>
+                <button id="btn-timeout-menu" class="btn btn-large btn-return" type="button">Volver al menú</button>
+            </div>
+        </div>
+    </div>
+
     <div id="victory-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title"
         aria-describedby="victory-description" aria-hidden="true">
         <div class="modal-content">
