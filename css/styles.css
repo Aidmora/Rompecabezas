@@ -3011,3 +3011,81 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .time-warning { animation: none; }
 }
+
+/* =========================================
+   30. SIN RECORTES: LA PÁGINA CRECE Y HACE SCROLL VERTICAL
+   Antes body medía 100vh con overflow: hidden y cortaba el contenido en
+   pantallas pequeñas o con zoom (WCAG 1.4.10). Ahora 100vh es el mínimo.
+   ========================================= */
+
+body {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.game-container {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* La pantalla activa pasa al flujo normal: si su contenido es más alto que la ventana,
+   la página crece hacia abajo en vez de desbordar por arriba y por abajo */
+.screen-section.active {
+  position: relative;
+  height: auto;
+  min-height: calc(100vh - 40px);
+  min-height: calc(100dvh - 40px);
+}
+
+/* Pantalla de juego: la tarjeta del tablero puede crecer si los botones ocupan dos filas */
+.game-layout-centered {
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: visible;
+}
+.board-area { min-height: min-content; }
+
+/* El SVG de la mascota era "inline" y dejaba 4px de hueco bajo la línea base: con el scroll
+   habilitado eso creaba una barra de desplazamiento innecesaria en todas las pantallas */
+.mascot-vector-container svg { display: block; }
+
+/* =========================================
+   31. BOTÓN "MOVER TOCANDO" (NIVEL DIFÍCIL)
+   ========================================= */
+
+.btn-tap-mode {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 3px solid var(--sec-amber);
+  border-radius: 50px;
+  background: #fff;
+  color: var(--sec-amber-dark);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--sec-amber-dark);
+}
+.btn-tap-mode.hidden { display: none; }
+
+/* Activado: color lleno y un visto, para no depender solo del color */
+.btn-tap-mode[aria-pressed="true"] {
+  background: var(--sec-amber);
+  color: #fff;
+}
+.btn-tap-mode[aria-pressed="true"]::after {
+  content: "✓";
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .btn-tap-mode { padding: 8px 14px; font-size: 1rem; }
+}

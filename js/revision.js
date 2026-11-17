@@ -13,10 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSavedAvatar();
     loadAndDisplayConfig();
 
-    const reviewItems = document.querySelectorAll('.review-item');
+    // Las flechas se mueven solo entre los botones; las tarjetas del resumen no son interactivas.
     const actionButtons = [btnBack, btnStart].filter(btn => btn !== null);
-    const allFocusable = [...Array.from(reviewItems), ...actionButtons];
-    setupArrowNavigation(allFocusable);
+    setupArrowNavigation(actionButtons);
 
     if (btnBack) {
         btnBack.addEventListener('click', () => {

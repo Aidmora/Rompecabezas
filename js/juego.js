@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTimeoutMenu = document.getElementById('btn-timeout-menu');
     if (timeoutOverlay) trapModalKeys(timeoutOverlay, null);
     if (btnTimeoutRetry) btnTimeoutRetry.addEventListener('click', () => location.reload());
+    const btnTimeoutOther = document.getElementById('btn-timeout-other');
+    if (btnTimeoutOther) btnTimeoutOther.addEventListener('click', () => window.location.href = 'seleccion.html');
     if (btnTimeoutMenu) btnTimeoutMenu.addEventListener('click', () => window.location.href = 'index.html');
 
     function handleTimeUp() {
@@ -223,8 +225,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.board-area');
         if (!container) return;
 
+        // Se mide con el tablero plegado: así la tarjeta (que ahora puede crecer con su
+        // contenido) no hereda el tamaño anterior al achicar la ventana.
+        workspaceElement.style.width = '0px';
+        workspaceElement.style.height = '0px';
+
         const availWidth = container.clientWidth - 40;
-        const availHeight = container.clientHeight - 120; 
+        const availHeight = container.clientHeight - 140; // deja sitio a la fila de botones sin forzar scroll
         
         let size = Math.min(availWidth, availHeight);
         size = Math.max(280, Math.min(size, 800));
@@ -258,10 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
             announceToScreenReader("Nivel Fácil. Las piezas están giradas. Presiona Enter o Espacio para girarlas.");
         } else if (config.difficulty === 'medium') {
             gameInstruction.textContent = "Nivel Medio";
-            assistantSay("¡Arrastra las piezas para ordenarlas!");
+            assistantSay("Arrastra las piezas, o toca una y luego toca su lugar.");
             announceToScreenReader("Nivel Medio. Usa las flechas para navegar entre piezas. Presiona Enter para seleccionar una pieza, navega a otra y presiona Enter para intercambiarlas.");
         } else {
             gameInstruction.textContent = "Nivel Difícil";
+            if (btnTapMode) btnTapMode.classList.remove('hidden'); // solo aquí el toque tiene dos usos
             assistantSay("Pon las piezas en su sitio y tócalas para girarlas.");
             announceToScreenReader("Nivel Difícil. Usa las flechas para navegar. Presiona Enter para seleccionar e intercambiar piezas. Presiona R para girar.");
         }
@@ -716,6 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!pointerState.dragging) {
             if (!CAN_DRAG() || Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
             pointerState.dragging = true;
+            setSwapSelection(null); // al arrastrar se descarta la selección hecha con toque o teclado
             piece.classList.add('dragging');
             piece.style.transition = 'none';
         }
@@ -734,9 +743,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (dragging) {
             if (target && target !== piece.parentElement) movePieceToSlot(piece, target);
+        } else if (tapMovesPieces()) {
+            handleTapMove(piece);
         } else if (CAN_ROTATE()) {
             rotatePiece(piece);
         }
+    }
+
+    // --- Mover sin arrastrar (WCAG 2.5.7): tocar una pieza y luego tocar su destino ---
+    // Nivel Medio: el toque siempre selecciona/mueve (ahí el toque no gira).
+    // Nivel Difícil: el toque gira por defecto; el botón "Mover tocando" lo cambia a seleccionar/mover.
+    // Nivel Fácil: las piezas no se mueven de casilla, solo se giran.
+
+    const btnTapMode = document.getElementById('btn-tap-mode');
+    let tapMoveMode = false;
+
+    function tapMovesPieces() {
+        return config.difficulty === 'medium' || (config.difficulty === 'hard' && tapMoveMode);
+    }
+
+    function handleTapMove(piece) {
+        if (gameEnded) return;
+        resetIdleTimer();
+        const pieceNumber = parseInt(piece.parentElement.dataset.index) + 1;
+
+        if (!selectedPieceForSwap) {
+            setSwapSelection(piece);
+            giveFeedback('¡Bien! Ahora toca dónde va.',
+                `Pieza ${pieceNumber} seleccionada. Toca otra pieza para intercambiarlas.`);
+        } else if (selectedPieceForSwap === piece) {
+            setSwapSelection(null);
+            announceToScreenReader(`Pieza ${pieceNumber} deseleccionada.`);
+        } else {
+            const selected = selectedPieceForSwap;
+            setSwapSelection(null);
+            movePieceToSlot(selected, piece.parentElement);
+        }
+    }
+
+    // Las piezas ya colocadas no reciben toques (pointer-events: none): el toque llega a su casilla.
+    boardElement.addEventListener('click', (e) => {
+        if (!selectedPieceForSwap || gameEnded || !tapMovesPieces()) return;
+        const slot = e.target.closest('.drop-zone');
+        const piece = slot && slot.children[0];
+        if (piece && piece.classList.contains('correct') && e.target === slot) {
+            giveFeedback('Esa pieza ya está en su lugar. ¡Toca otra!');
+        }
+    });
+
+    if (btnTapMode) {
+        btnTapMode.addEventListener('click', () => {
+            tapMoveMode = !tapMoveMode;
+            btnTapMode.setAttribute('aria-pressed', String(tapMoveMode));
+            setSwapSelection(null);
+            resetIdleTimer();
+            if (tapMoveMode) {
+                giveFeedback('Toca una pieza y luego toca dónde va.',
+                    'Mover tocando activado. Toca una pieza y luego toca otra para intercambiarlas.');
+            } else {
+                giveFeedback('Toca una pieza para girarla.',
+                    'Mover tocando desactivado. Al tocar una pieza, gira.');
+            }
+        });
     }
 
     function handlePointerCancel(e) {
@@ -866,8 +934,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Frases cortas para el niño; las teclas van aparte, solo al lector de pantalla.
         const childText = {
             easy: 'Toca una pieza para girarla. Gírala hasta que quede derecha. ¡Arma toda la imagen!',
-            medium: 'Arrastra cada pieza a su lugar. Mira la imagen para guiarte. ¡Arma toda la imagen!',
-            hard: 'Arrastra cada pieza a su lugar. Tócala para girarla. ¡Arma toda la imagen!'
+            medium: 'Arrastra cada pieza a su lugar. También puedes tocar una pieza y luego tocar su lugar. ¡Arma toda la imagen!',
+            hard: 'Arrastra cada pieza a su lugar. Tócala para girarla. Con el botón Mover tocando, toca una pieza y luego su lugar. ¡Arma toda la imagen!'
         }[config.difficulty] || 'Arma toda la imagen.';
         const keyboardText = {
             easy: 'Con teclado: usa las flechas para moverte entre piezas y Enter o Espacio para girar.',
@@ -1187,8 +1255,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (btnCancelGame) {
         btnCancelGame.addEventListener('click', () => {
+            // El cronómetro no corre mientras el cuadro de confirmación está abierto.
+            const wasRunning = lastTick !== null;
+            stopTimer();
+            clearTimeout(idleTimer);
             if (confirm("¿Salir al menú principal? Perderás el progreso.")) {
                 window.location.href = 'index.html';
+            } else if (!gameEnded) {
+                if (wasRunning && !isPaused) startTimer();
+                resetIdleTimer();
             }
         });
     }
