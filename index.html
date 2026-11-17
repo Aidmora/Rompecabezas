@@ -96,6 +96,18 @@
         </section>
     </main>
 
+    <div id="exit-overlay" class="game-overlay hidden" aria-hidden="true">
+        <div class="game-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"
+            aria-describedby="exit-description" tabindex="-1">
+            <h2 id="exit-title">¿Quieres salir?</h2>
+            <p id="exit-description">¿Seguro que quieres salir, héroe?</p>
+            <div class="modal-actions">
+                <button id="btn-exit-confirm" class="dialog-btn dialog-btn-red" type="button">Salir</button>
+                <button id="btn-exit-cancel" class="dialog-btn dialog-btn-blue" type="button">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <aside class="mascot-section" role="complementary" aria-label="Asistente virtual del juego">
         <div class="speech-bubble" id="mascot-text" role="status" aria-live="polite"
             aria-label="Mensaje del asistente: ¡Hola, héroe! Estoy listo para ayudarte. ¡Elige tu misión y empecemos la aventura!">

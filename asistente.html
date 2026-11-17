@@ -67,7 +67,7 @@
 
     <main class="game-container" id="contenido-principal" tabindex="-1">
         <section id="customize-screen" class="screen-section active" aria-labelledby="titulo-personalizar">
-            <h1 id="titulo-personalizar" class="settings-title">Elige a tu compañero</h1>
+            <h1 id="titulo-personalizar" class="settings-title">Elige cómo me veo</h1>
 
             <div class="customize-layout">
                 <div class="customize-preview-column" role="region" aria-label="Vista previa del avatar seleccionado">
@@ -75,14 +75,15 @@
                         <div id="avatar-preview-container" class="avatar-vector-large" aria-hidden="true"></div>
                         <div class="preview-shine" aria-hidden="true"></div>
                     </div>
-                    <h2 class="preview-label">Seleccionado actual</h2>
+                    <h2 class="sr-only">Así me veo ahora</h2>
                 </div>
 
                 <div class="customize-grid-column" role="region" aria-label="Galería de opciones de avatar">
-                    <div class="avatar-grid" role="radiogroup" aria-labelledby="titulo-personalizar">
+                    <div class="avatar-grid" role="radiogroup" aria-label="Tipo de asistente">
 
                         <button type="button" class="avatar-option selected" data-id="hero" role="radio"
-                            aria-checked="true" aria-label="Superhéroe Clásico con traje azul y capa roja">
+                            aria-checked="true" aria-label="Héroe clásico, con traje azul y capa roja">
+                            <span class="avatar-option-label">Héroe clásico</span>
                             <svg viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg" class="avatar-svg"
                                 aria-hidden="true">
                                 <path d="M130,140 Q60,250 80,450 L320,450 Q340,250 270,140 Z"
@@ -129,7 +130,8 @@
                         </button>
 
                         <button type="button" class="avatar-option" data-id="robot" role="radio" aria-checked="false"
-                            aria-label="Robot Amigable de metal gris con ojos azules">
+                            aria-label="Robot, de metal gris con ojos azules">
+                            <span class="avatar-option-label">Robot</span>
                             <svg viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg" class="avatar-svg"
                                 aria-hidden="true">
                                 <path d="M165,300 L160,450 L195,450 L200,300 Z" fill="#6B7280" />
@@ -152,7 +154,8 @@
                         </button>
 
                         <button type="button" class="avatar-option" data-id="pet" role="radio" aria-checked="false"
-                            aria-label="Mascota Adorable, perrito dorado con collar rojo">
+                            aria-label="Animal, un perrito dorado con collar rojo">
+                            <span class="avatar-option-label">Animal</span>
                             <svg viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg" class="avatar-svg"
                                 aria-hidden="true">
                                 <path d="M150,300 L140,450 L170,450 L180,300 Z" fill="url(#globalDogFur)" />
@@ -173,7 +176,8 @@
                         </button>
 
                         <button type="button" class="avatar-option" data-id="hero-alt" role="radio" aria-checked="false"
-                            aria-label="Héroe Alternativo con traje verde y capa morada">
+                            aria-label="Explorador, con traje verde y capa morada">
+                            <span class="avatar-option-label">Explorador</span>
                             <svg viewBox="0 0 400 550" xmlns="http://www.w3.org/2000/svg" class="avatar-svg"
                                 aria-hidden="true">
                                 <path d="M130,140 Q60,250 80,450 L320,450 Q340,250 270,140 Z"
@@ -209,14 +213,29 @@
                         </button>
 
                     </div>
+                    <h2 id="titulo-colores" class="color-row-title">Color</h2>
+                    <div class="color-row" role="radiogroup" aria-labelledby="titulo-colores">
+                        <button type="button" class="color-option selected" role="radio" aria-checked="true"
+                            data-color="" aria-label="Color original"></button>
+                        <button type="button" class="color-option" role="radio" aria-checked="false"
+                            data-color="#DC2626" style="--swatch:#DC2626" aria-label="Rojo"></button>
+                        <button type="button" class="color-option" role="radio" aria-checked="false"
+                            data-color="#2563EB" style="--swatch:#2563EB" aria-label="Azul"></button>
+                        <button type="button" class="color-option" role="radio" aria-checked="false"
+                            data-color="#15803D" style="--swatch:#15803D" aria-label="Verde"></button>
+                        <button type="button" class="color-option" role="radio" aria-checked="false"
+                            data-color="#F59E0B" style="--swatch:#F59E0B" aria-label="Naranja"></button>
+                        <button type="button" class="color-option" role="radio" aria-checked="false"
+                            data-color="#7C3AED" style="--swatch:#7C3AED" aria-label="Morado"></button>
+                    </div>
                 </div>
             </div>
 
             <div class="settings-actions">
                 <button type="button" class="btn-large btn-cancel" id="btn-cancel-avatar"
-                    aria-label="Cancelar y volver a ajustes">Cancelar</button>
+                    aria-label="Regresar a ajustes sin guardar">Regresar</button>
                 <button type="button" class="btn-large btn-save" id="btn-save-avatar"
-                    aria-label="Guardar selección de avatar">Guardar Selección</button>
+                    aria-label="Guardar cómo se ve el asistente">Guardar</button>
             </div>
         </section>
     </main>

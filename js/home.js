@@ -30,13 +30,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnExit) {
-        btnExit.addEventListener('click', () => {
-            const confirmExit = confirm("¿Seguro que quieres salir, héroe?");
-            if (confirmExit) {
-                window.close();
-                document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%'>¡Hasta la próxima aventura!</h1>";
-                document.body.style.backgroundColor = "#333";
+        btnExit.addEventListener('click', openExitDialog);
+    }
+
+    // --- Diálogo propio para salir (reemplaza al confirm() nativo) ---
+
+    const exitOverlay = document.getElementById('exit-overlay');
+    const btnExitConfirm = document.getElementById('btn-exit-confirm');
+    const btnExitCancel = document.getElementById('btn-exit-cancel');
+
+    // Mientras el diálogo está abierto, el resto de la página queda inerte.
+    function setPageInert(isInert) {
+        document.querySelectorAll('body > .skip-link, body > header, body > main, body > aside')
+            .forEach(el => { el.inert = isInert; });
+    }
+
+    function openExitDialog() {
+        if (!exitOverlay) return;
+        setPageInert(true);
+        exitOverlay.classList.remove('hidden');
+        exitOverlay.setAttribute('aria-hidden', 'false');
+        btnExitCancel.focus(); // el foco empieza en la opción segura
+    }
+
+    function closeExitDialog() {
+        if (!exitOverlay || exitOverlay.classList.contains('hidden')) return;
+        exitOverlay.classList.add('hidden');
+        exitOverlay.setAttribute('aria-hidden', 'true');
+        setPageInert(false);
+        if (btnExit) btnExit.focus();
+    }
+
+    if (exitOverlay && btnExitConfirm && btnExitCancel) {
+        btnExitCancel.addEventListener('click', closeExitDialog);
+        exitOverlay.addEventListener('click', (e) => { if (e.target === exitOverlay) closeExitDialog(); });
+        // Escape cancela y Tab no sale del diálogo.
+        exitOverlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeExitDialog();
+            } else if (e.key === 'Tab') {
+                const first = btnExitConfirm, last = btnExitCancel;
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                else if (document.activeElement !== first && document.activeElement !== last) { e.preventDefault(); first.focus(); }
             }
+        });
+        btnExitConfirm.addEventListener('click', () => {
+            window.close();
+            document.body.innerHTML = "<h1 style='color:white; text-align:center; margin-top:20%'>¡Hasta la próxima aventura!</h1>";
+            document.body.style.backgroundColor = "#333";
         });
     }
 

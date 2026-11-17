@@ -110,6 +110,13 @@
         <section class="board-area" aria-labelledby="board-title">
             <h2 id="board-title" class="sr-only">Área de juego del rompecabezas</h2>
 
+            <div class="board-topbar">
+                <p id="board-instruction" class="board-instruction">Toca para girar, arrastra para mover</p>
+                <button id="btn-tap-mode" class="btn-tap-mode hidden" type="button" aria-pressed="false">
+                    <span aria-hidden="true">✋</span> Mover tocando
+                </button>
+            </div>
+
             <div id="game-workspace" class="game-workspace">
                 <div id="puzzle-board" class="puzzle-board" role="grid"
                     aria-label="Tablero del rompecabezas. Usa las flechas para moverte entre las piezas"></div>
@@ -124,9 +131,6 @@
                 </button>
                 <button id="btn-help" class="btn-help" type="button" aria-label="Pedir pista">
                     <span aria-hidden="true">💡</span> Pista
-                </button>
-                <button id="btn-tap-mode" class="btn-tap-mode hidden" type="button" aria-pressed="false">
-                    <span aria-hidden="true">✋</span> Mover tocando
                 </button>
                 <button id="btn-listen" class="btn-listen" type="button" aria-label="Escuchar las instrucciones del juego">
                     <span class="btn-listen-icon" aria-hidden="true">🔊</span>
@@ -239,6 +243,18 @@
                 <button id="btn-timeout-retry" class="btn btn-large btn-save" type="button">Reintentar</button>
                 <button id="btn-timeout-other" class="btn btn-large btn-primary" type="button">Elegir otra imagen</button>
                 <button id="btn-timeout-menu" class="btn btn-large btn-return" type="button">Volver al menú</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="exit-overlay" class="game-overlay hidden" aria-hidden="true">
+        <div class="game-dialog" role="dialog" aria-modal="true" aria-labelledby="exit-title"
+            aria-describedby="exit-description" tabindex="-1">
+            <h2 id="exit-title">¿Salir del juego?</h2>
+            <p id="exit-description">Si sales ahora, perderás el avance de este rompecabezas.</p>
+            <div class="modal-actions">
+                <button id="btn-exit-confirm" class="dialog-btn dialog-btn-red" type="button">Salir</button>
+                <button id="btn-exit-cancel" class="dialog-btn dialog-btn-blue" type="button">Cancelar</button>
             </div>
         </div>
     </div>

@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserPreferences();
     loadSavedAvatar();
 
+    const btnContinue = document.getElementById('btn-continue');
+    if (btnContinue) {
+        btnContinue.addEventListener('click', () => {
+            window.location.href = 'revision.html'; // mismo destino que "Jugar" en el menú
+        });
+    }
+
     if (btnBack) {
         btnBack.addEventListener('click', () => {
             window.location.href = 'index.html';

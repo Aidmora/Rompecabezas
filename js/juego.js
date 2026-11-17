@@ -230,8 +230,18 @@ document.addEventListener('DOMContentLoaded', () => {
         workspaceElement.style.width = '0px';
         workspaceElement.style.height = '0px';
 
-        const availWidth = container.clientWidth - 40;
-        const availHeight = container.clientHeight - 140; // deja sitio a la fila de botones sin forzar scroll
+        // Espacio libre real: alto de la tarjeta menos su relleno y lo que ocupan
+        // la barra de instrucción y la fila de botones.
+        const cs = getComputedStyle(container);
+        let othersHeight = 0;
+        for (const child of container.children) {
+            if (child === workspaceElement) continue;
+            const s = getComputedStyle(child);
+            if (s.position === 'absolute' || s.display === 'none') continue;
+            othersHeight += child.offsetHeight + parseFloat(s.marginTop) + parseFloat(s.marginBottom);
+        }
+        const availWidth = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const availHeight = container.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - othersHeight - 10;
         
         let size = Math.min(availWidth, availHeight);
         size = Math.max(280, Math.min(size, 800));
@@ -272,6 +282,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (btnTapMode) btnTapMode.classList.remove('hidden'); // solo aquí el toque tiene dos usos
             assistantSay("Pon las piezas en su sitio y tócalas para girarlas.");
             announceToScreenReader("Nivel Difícil. Usa las flechas para navegar. Presiona Enter para seleccionar e intercambiar piezas. Presiona R para girar.");
+        }
+
+        // Barra de instrucción sobre el tablero: qué hace el toque y el arrastre en este nivel.
+        const boardInstruction = document.getElementById('board-instruction');
+        if (boardInstruction) {
+            boardInstruction.textContent = {
+                easy: 'Toca una pieza para girarla',
+                medium: 'Arrastra para mover, o toca una pieza y luego su lugar',
+                hard: 'Toca para girar, arrastra para mover'
+            }[config.difficulty] || boardInstruction.textContent;
         }
 
         // Estructura de cuadrícula accesible: grid > row > gridcell. Las filas usan
@@ -1254,19 +1274,45 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnBackMenu) btnBackMenu.addEventListener('click', () => window.location.href = 'revision.html');
     
     if (btnCancelGame) {
-        btnCancelGame.addEventListener('click', () => {
-            // El cronómetro no corre mientras el cuadro de confirmación está abierto.
-            const wasRunning = lastTick !== null;
-            stopTimer();
-            clearTimeout(idleTimer);
-            if (confirm("¿Salir al menú principal? Perderás el progreso.")) {
-                window.location.href = 'index.html';
-            } else if (!gameEnded) {
-                if (wasRunning && !isPaused) startTimer();
-                resetIdleTimer();
-            }
-        });
+        btnCancelGame.addEventListener('click', openExitDialog);
     }
+
+    // --- Diálogo propio para salir (reemplaza al confirm() nativo) ---
+
+    const exitOverlay = document.getElementById('exit-overlay');
+    const btnExitConfirm = document.getElementById('btn-exit-confirm');
+    const btnExitCancel = document.getElementById('btn-exit-cancel');
+    let exitTimerWasRunning = false;
+
+    function openExitDialog() {
+        if (!exitOverlay) return;
+        // El cronómetro no corre mientras el diálogo está abierto.
+        exitTimerWasRunning = lastTick !== null;
+        stopTimer();
+        clearTimeout(idleTimer);
+        stopAssistantVoice();
+        setListenButton(false);
+        if (!sideMenuOverlay.classList.contains('hidden')) closeSideMenu();
+        showOverlay(exitOverlay, btnExitCancel); // el foco empieza en la opción segura
+        announceToScreenReader('¿Salir del juego? Si sales ahora, perderás el avance de este rompecabezas.');
+    }
+
+    function closeExitDialog() {
+        if (!exitOverlay || exitOverlay.classList.contains('hidden')) return;
+        hideOverlay(exitOverlay);
+        if (btnMenuToggle) btnMenuToggle.focus();
+        if (!gameEnded) {
+            if (exitTimerWasRunning && !isPaused) startTimer();
+            resetIdleTimer();
+        }
+    }
+
+    if (exitOverlay) {
+        trapModalKeys(exitOverlay, closeExitDialog);
+        exitOverlay.addEventListener('click', (e) => { if (e.target === exitOverlay) closeExitDialog(); });
+    }
+    if (btnExitCancel) btnExitCancel.addEventListener('click', closeExitDialog);
+    if (btnExitConfirm) btnExitConfirm.addEventListener('click', () => window.location.href = 'index.html');
     
     if (btnMenu) btnMenu.addEventListener('click', () => window.location.href = 'index.html');
     const btnOtherImage = document.getElementById('btn-other-image');
