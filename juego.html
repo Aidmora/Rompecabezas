@@ -122,8 +122,12 @@
                     <img id="reference-thumb" src="" alt="">
                     <span>Ver imagen</span>
                 </button>
-                <button id="btn-help" class="btn-help hidden" aria-label="Pedir pista">
+                <button id="btn-help" class="btn-help" type="button" aria-label="Pedir pista">
                     <span aria-hidden="true">💡</span> Pista
+                </button>
+                <button id="btn-listen" class="btn-listen" type="button" aria-label="Escuchar las instrucciones del juego">
+                    <span class="btn-listen-icon" aria-hidden="true">🔊</span>
+                    <span class="btn-listen-label">Instrucciones</span>
                 </button>
                 <button id="btn-check" class="btn-check" aria-label="Comprobar solución">
                     Comprobar Solución
@@ -232,21 +236,42 @@
 
     <div id="victory-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title"
         aria-describedby="victory-description" aria-hidden="true">
-        <div class="modal-content">
-            <h2 id="victory-title" tabindex="0">¡Felicidades Héroe! <span aria-hidden="true">🎉</span></h2>
-            <p id="victory-description" tabindex="0">¡Completaste el rompecabezas!</p>
-            <div class="modal-stats" role="group" aria-label="Estadísticas del juego">
-                <p tabindex="0" id="stat-time">Tiempo: <span id="final-time">00:00</span></p>
-                <p tabindex="0" id="stat-moves">Movimientos: <span id="final-moves">0</span></p>
-                <p tabindex="0" id="stat-score">Puntaje: <span id="final-score">0</span></p>
-                <p tabindex="0" id="stat-difficulty">Dificultad: <span id="final-difficulty">Fácil</span></p>
+        <div class="victory-content">
+            <h2 id="victory-title" class="victory-title" tabindex="-1">
+                <span class="victory-title-main">¡Felicidades!</span>
+                <span class="victory-title-sub">Completaste el Rompecabezas</span>
+            </h2>
+
+            <!-- Anillo decorativo: si la imagen no carga, el contenedor muestra un anillo hecho con CSS -->
+            <div id="victory-ring" class="victory-ring" aria-hidden="true">
+                <img src="assets/images/anillo.png" alt="">
             </div>
-            <div class="modal-actions">
-                <button id="btn-replay" class="btn btn-large btn-save" aria-label="Jugar de nuevo">Jugar de
-                    Nuevo</button>
-                <button id="btn-other-image" class="btn btn-large btn-primary">Elegir otra imagen</button>
-                <button id="btn-menu" class="btn btn-large btn-return" aria-label="Ir al menú principal">Menú
-                    Principal</button>
+
+            <ul id="victory-description" class="victory-stats" aria-label="Resultados de la partida">
+                <li class="victory-pill pill-red">
+                    <span class="pill-label">Tiempo Completado</span>
+                    <strong id="final-time" class="pill-value">00:00</strong>
+                </li>
+                <li class="victory-pill pill-green">
+                    <span class="pill-label">Puntos Obtenidos</span>
+                    <strong id="final-score" class="pill-value">0</strong>
+                </li>
+                <li class="victory-pill pill-blue">
+                    <span class="pill-label">Dificultad / Tamaño</span>
+                    <strong id="final-difficulty" class="pill-value">Fácil</strong>
+                </li>
+            </ul>
+
+            <div class="victory-actions">
+                <button id="btn-replay" class="victory-btn vbtn-green" type="button">Jugar de Nuevo</button>
+                <button id="btn-other-image" class="victory-btn vbtn-blue" type="button">Seleccionar
+                    Rompecabezas</button>
+                <button id="btn-menu" class="victory-btn vbtn-red" type="button">Regresar</button>
+            </div>
+
+            <div class="victory-mascot">
+                <p class="speech-bubble victory-bubble">¡Lo lograste! ¡Eres un campeón!</p>
+                <div id="victory-mascot-container" class="mascot-vector-container" aria-hidden="true"></div>
             </div>
         </div>
     </div>

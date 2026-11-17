@@ -133,6 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isPaused = true;
         stopTimer();
         clearTimeout(idleTimer);
+        stopAssistantVoice();
+        setListenButton(false);
         closeReference(false);
         if (!sideMenuOverlay.classList.contains('hidden')) closeSideMenu();
         showOverlay(pauseOverlay, btnResume);
@@ -173,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (summaryEl) summaryEl.textContent = summary;
 
         if (timeoutOverlay) showOverlay(timeoutOverlay, btnTimeoutRetry);
-        updateMascotMessage('¡Se acabó el tiempo! Lo hiciste muy bien.');
+        assistantSay('¡Se acabó el tiempo! Lo hiciste muy bien.');
         announceToScreenReader(`Se acabó el tiempo. ${summary} ¿Quieres intentarlo otra vez?`);
     }
 
@@ -189,7 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.remove('hidden');
         overlay.setAttribute('aria-hidden', 'false');
         document.getElementById('btn-reference-close').focus();
-        announceToScreenReader('Así debe quedar el rompecabezas.');
+        speakAssistant('Así debe quedar.');
+        announceToScreenReader('Imagen de referencia abierta. Así debe quedar el rompecabezas. Presiona Escape para cerrar.');
     }
 
     function closeReference(restoreFocus = true) {
@@ -244,15 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (config.difficulty === 'easy') {
             gameInstruction.textContent = "Nivel Fácil";
-            updateMascotMessage("Las piezas están giradas. ¡Tócalas para arreglarlas!");
+            assistantSay("Las piezas están giradas. ¡Tócalas para arreglarlas!");
             announceToScreenReader("Nivel Fácil. Las piezas están giradas. Presiona Enter o Espacio para girarlas.");
         } else if (config.difficulty === 'medium') {
             gameInstruction.textContent = "Nivel Medio";
-            updateMascotMessage("¡Arrastra las piezas para ordenarlas!");
+            assistantSay("¡Arrastra las piezas para ordenarlas!");
             announceToScreenReader("Nivel Medio. Usa las flechas para navegar entre piezas. Presiona Enter para seleccionar una pieza, navega a otra y presiona Enter para intercambiarlas.");
         } else {
             gameInstruction.textContent = "Nivel Difícil";
-            updateMascotMessage("Ponlas en su sitio Y tócalas para girarlas.");
+            assistantSay("Pon las piezas en su sitio y tócalas para girarlas.");
             announceToScreenReader("Nivel Difícil. Usa las flechas para navegar. Presiona Enter para seleccionar e intercambiar piezas. Presiona R para girar.");
         }
 
@@ -463,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Validación inmediata: girar nunca muestra equis, solo confirma el acierto.
         if (validatePiece(piece, false) === 'correct') {
+            playSound('success');
             giveFeedback('¡Muy bien! Esa pieza está en su lugar.');
             checkCompletion();
         } else {
@@ -499,9 +503,64 @@ document.addEventListener('DOMContentLoaded', () => {
         return result;
     }
 
-    function giveFeedback(message) {
+    // Retroalimentación con dos destinatarios:
+    //  - childMessage: frase corta y positiva para el niño (burbuja + voz del asistente).
+    //  - srMessage: texto para el lector de pantalla (región aria-live); puede llevar
+    //    teclas o estados técnicos que la voz del asistente nunca lee.
+    function giveFeedback(childMessage, srMessage = childMessage) {
+        assistantSay(childMessage);
+        announceToScreenReader(srMessage);
+    }
+
+    // El asistente habla al niño: actualiza la burbuja y, si hay estímulo auditivo, lo dice en voz alta.
+    function assistantSay(message) {
         updateMascotMessage(message);
-        announceToScreenReader(message);
+        speakAssistant(message);
+    }
+
+    // Estímulo auditivo activo solo con "Solo Sonido" o "Visual y Sonido" en Ajustes.
+    function audioEnabled() {
+        return config.stimuli === 'sound' || config.stimuli === 'mixed';
+    }
+
+    // --- Efectos de sonido (Web Audio API): tonos cortos generados en código ---
+
+    // Cada nota: [frecuencia en Hz, duración en segundos]
+    const SOUNDS = {
+        success: { wave: 'sine',     notes: [[523.25, 0.12], [783.99, 0.22]] },
+        error:   { wave: 'sine',     notes: [[246.94, 0.16], [196.00, 0.26]] },
+        victory: { wave: 'triangle', notes: [[523.25, 0.14], [659.25, 0.14], [783.99, 0.14], [1046.5, 0.45]] }
+    };
+    let audioCtx = null;
+
+    function playSound(name) {
+        const sound = SOUNDS[name];
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!sound || !AudioCtx || !audioEnabled()) return;
+
+        try {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            let start = audioCtx.currentTime + 0.02;
+            sound.notes.forEach(([freq, duration]) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = sound.wave;
+                osc.frequency.value = freq;
+                // Envolvente suave (sin clics) y volumen moderado para no sobresaltar.
+                gain.gain.setValueAtTime(0.0001, start);
+                gain.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(start);
+                osc.stop(start + duration + 0.02);
+                start += duration * 0.9;
+            });
+        } catch (err) {
+            // Sin audio disponible: el juego sigue con la retroalimentación visual.
+        }
     }
 
     function checkCompletion() {
@@ -537,9 +596,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (other) validatePiece(other, false);
         const result = validatePiece(piece, true);
 
-        if (result === 'correct') giveFeedback('¡Muy bien! Esa pieza está en su lugar.');
-        else if (result === 'rotate') giveFeedback('¡Casi! Ahora gírala para que encaje.');
-        else giveFeedback('Esa pieza no va ahí. ¡Prueba otro lugar!');
+        if (result === 'correct') {
+            playSound('success');
+            giveFeedback('¡Muy bien! Esa pieza está en su lugar.');
+        } else if (result === 'rotate') {
+            giveFeedback('¡Casi! Ahora gírala para que encaje.',
+                '¡Casi! La pieza está en su lugar pero girada. Presiona R para girarla.');
+        } else {
+            playSound('error');
+            giveFeedback('Esa pieza no va ahí. ¡Prueba otro lugar!');
+        }
 
         checkCompletion();
         return true;
@@ -697,22 +763,84 @@ document.addEventListener('DOMContentLoaded', () => {
                 announcer.textContent = message;
             }, 100);
         }
-        
-        if (config.stimuli === 'sound' || config.stimuli === 'mixed') {
-            speakMessage(message);
+    }
+
+    // Voz del asistente (Web Speech API): solo frases dirigidas al niño.
+    // Lo que va a announceToScreenReader nunca pasa por aquí.
+    function speakAssistant(message, onEnd) {
+        if (!audioEnabled() || !('speechSynthesis' in window)) return false;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        if (onEnd) {
+            utterance.onend = onEnd;
+            utterance.onerror = onEnd;
+        }
+        window.speechSynthesis.speak(utterance);
+        return true;
+    }
+
+    function stopAssistantVoice() {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    // --- Botón de instrucciones: el asistente explica cómo se juega ---
+
+    const btnListen = document.getElementById('btn-listen');
+    let readingInstructions = false;
+
+    function setListenButton(reading) {
+        readingInstructions = reading;
+        if (!btnListen) return;
+        const label = btnListen.querySelector('.btn-listen-label');
+        const icon = btnListen.querySelector('.btn-listen-icon');
+        if (reading) {
+            if (icon) icon.textContent = '⏹️';
+            if (label) label.textContent = 'Detener';
+            btnListen.setAttribute('aria-label', 'Detener la lectura de las instrucciones');
+        } else if (audioEnabled()) {
+            if (icon) icon.textContent = '🔊';
+            if (label) label.textContent = 'Instrucciones';
+            btnListen.setAttribute('aria-label', 'Escuchar las instrucciones del juego');
+        } else {
+            // Solo Visual: el botón muestra las instrucciones en la burbuja, sin voz.
+            if (icon) icon.textContent = '📖';
+            if (label) label.textContent = 'Instrucciones';
+            btnListen.setAttribute('aria-label', 'Ver las instrucciones del juego');
         }
     }
 
-    function speakMessage(message) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(message);
-            utterance.lang = 'es-ES';
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            window.speechSynthesis.speak(utterance);
+    function playInstructions() {
+        if (gameEnded) return;
+        resetIdleTimer();
+
+        if (readingInstructions) {
+            stopAssistantVoice();
+            setListenButton(false);
+            return;
         }
+
+        // Frases cortas para el niño; las teclas van aparte, solo al lector de pantalla.
+        const childText = {
+            easy: 'Toca una pieza para girarla. Gírala hasta que quede derecha. ¡Arma toda la imagen!',
+            medium: 'Arrastra cada pieza a su lugar. Mira la imagen para guiarte. ¡Arma toda la imagen!',
+            hard: 'Arrastra cada pieza a su lugar. Tócala para girarla. ¡Arma toda la imagen!'
+        }[config.difficulty] || 'Arma toda la imagen.';
+        const keyboardText = {
+            easy: 'Con teclado: usa las flechas para moverte entre piezas y Enter o Espacio para girar.',
+            medium: 'Con teclado: usa las flechas para moverte, Enter para seleccionar una pieza y Enter en otra para intercambiarlas.',
+            hard: 'Con teclado: usa las flechas para moverte, Enter para seleccionar e intercambiar piezas y R para girar.'
+        }[config.difficulty] || '';
+
+        updateMascotMessage(childText);
+        announceToScreenReader(`${childText} ${keyboardText}`);
+        if (speakAssistant(childText, () => setListenButton(false))) setListenButton(true);
     }
+
+    if (btnListen) btnListen.addEventListener('click', playInstructions);
+    setListenButton(false); // etiqueta inicial según el ajuste de estímulos
 
     function resetPieceStyle(piece) {
         piece.style.position = 'relative';
@@ -726,9 +854,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetIdleTimer() {
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => {
-            btnHelp.classList.remove('hidden');
-            updateMascotMessage("¿Necesitas una pista? Toca el foco de abajo.");
-            announceToScreenReader("¿Necesitas una pista? El botón de pista está disponible.");
+            giveFeedback("¿Necesitas una pista? Toca el foco de abajo.",
+                "¿Necesitas una pista? Usa el botón Pedir pista.");
         }, 15000);
     }
 
@@ -783,8 +910,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             const incorrectCount = totalPieces - correctCount;
-            updateMascotMessage(`Hay ${incorrectCount} pieza${incorrectCount > 1 ? 's' : ''} incorrecta${incorrectCount > 1 ? 's' : ''}. ¡Sigue intentando!`);
-            announceToScreenReader(`Resultado: ${correctCount} piezas correctas, ${incorrectCount} piezas incorrectas. Sigue intentando.`);
+            playSound('error');
+            giveFeedback(
+                incorrectCount > 1 ? `Faltan ${incorrectCount} piezas. ¡Sigue intentando!` : 'Falta 1 pieza. ¡Ya casi!',
+                `Resultado: ${correctCount} piezas correctas, ${incorrectCount} piezas incorrectas. Sigue intentando.`);
             
             setTimeout(() => {
                 document.querySelectorAll('.incorrect').forEach(el => el.classList.remove('incorrect'));
@@ -797,6 +926,9 @@ document.addEventListener('DOMContentLoaded', () => {
         hintsUsed++;
         let hintFound = false;
         let hintMessage = '';
+        let childHint = '';
+        if (gameEnded) return;
+        resetIdleTimer();
 
         for (let slot of slots) {
             if (slot.children.length > 0) {
@@ -808,14 +940,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (pIndex !== sIndex) {
                     piece.classList.add('incorrect');
                     hintMessage = `La pieza ${pIndex + 1} no está en su lugar correcto. Intenta moverla.`;
-                    updateMascotMessage("Esta pieza no está en su lugar. Intenta moverla.");
+                    childHint = "Esta pieza no está en su lugar. Intenta moverla.";
                     setTimeout(() => piece.classList.remove('incorrect'), 2000);
                     hintFound = true;
                     break;
                 } else if (rot !== 0) {
                     piece.classList.add('incorrect');
                     hintMessage = `La pieza ${pIndex + 1} necesita ser girada. Está rotada ${rot} grados.`;
-                    updateMascotMessage("Esta pieza necesita ser girada.");
+                    childHint = "Esta pieza necesita un giro.";
                     setTimeout(() => piece.classList.remove('incorrect'), 2000);
                     hintFound = true;
                     break;
@@ -825,10 +957,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!hintFound) {
             hintMessage = "¡Todo se ve bien! Presiona Comprobar Solución.";
-            updateMascotMessage("¡Todo se ve bien! Dale a Comprobar.");
+            childHint = "¡Todo se ve bien! Toca Comprobar.";
         }
 
-        announceToScreenReader(hintMessage);
+        giveFeedback(childHint, hintMessage);
     });
 
     if(btnMenuToggle) {
@@ -954,10 +1086,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         closeReference(false);
 
+        if (!sideMenuOverlay.classList.contains('hidden')) closeSideMenu();
+
         if(victoryModal) {
+            // La mascota (con el avatar elegido) pasa a la pantalla de felicitación.
+            const mascotSource = document.getElementById('global-mascot-container');
+            const mascotTarget = document.getElementById('victory-mascot-container');
+            if (mascotSource && mascotTarget) mascotTarget.append(...mascotSource.childNodes);
+
+            // El juego que queda detrás deja de ser alcanzable con teclado y lector de pantalla.
+            document.querySelectorAll('.game-header-bar, #contenido-principal, .game-mascot')
+                .forEach(el => { el.inert = true; });
+
             victoryModal.classList.remove('hidden');
             victoryModal.setAttribute('aria-hidden', 'false');
 
+            // El foco va al título: el lector anuncia el diálogo y el siguiente Tab llega al primer botón.
             const victoryTitle = document.getElementById('victory-title');
             if (victoryTitle) {
                 setTimeout(() => victoryTitle.focus(), 100);
@@ -965,8 +1109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const victoryMessage = `¡Felicidades! Completaste el rompecabezas en ${finalTime} con ${moves} movimientos. Tu puntaje es ${score} puntos en dificultad ${difficultyLabel}.`;
-        updateMascotMessage("¡Lo lograste! ¡Eres un campeón!");
-        announceToScreenReader(victoryMessage);
+        playSound('victory');
+        giveFeedback("¡Lo lograste! ¡Eres un campeón!", victoryMessage);
     }
 
     function loadSavedAvatar() {
@@ -989,7 +1133,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnOtherImage = document.getElementById('btn-other-image');
     if (btnOtherImage) btnOtherImage.addEventListener('click', () => window.location.href = 'seleccion.html');
     if (btnReplay) btnReplay.addEventListener('click', () => location.reload());
-    
+
+    // Pantalla de felicitación: Tab no sale del diálogo y, si falta la imagen del anillo, se usa el de CSS.
+    if (victoryModal) trapModalKeys(victoryModal, null);
+    const victoryRing = document.getElementById('victory-ring');
+    const victoryRingImg = victoryRing ? victoryRing.querySelector('img') : null;
+    if (victoryRingImg) {
+        const useCssRing = () => victoryRing.classList.add('ring-missing');
+        victoryRingImg.addEventListener('error', useCssRing);
+        if (victoryRingImg.complete && victoryRingImg.naturalWidth === 0) useCssRing();
+    }
+
     if (btnPause) {
         btnPause.addEventListener('click', pauseGame);
     }
