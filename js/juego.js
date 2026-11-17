@@ -28,9 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let elapsedMs = 0;
     let lastTick = null;      // null = cronómetro detenido
     let timeLimit = null;     // segundos; null = modo libre
-    let warningShown = false;
+    let warningsGiven = 0;    // cuántos avisos de TIME_WARNINGS ya se dieron
+    let slots = [];           // casillas del tablero en orden (fila por fila)
     let isPaused = false;
-    const WARNING_SECONDS = 30;
+    const TIME_WARNINGS = [30, 10]; // segundos restantes en los que se avisa (modo cronometrado)
     let timerInterval;
     let hintsUsed = 0;
     let pointerState = null;
@@ -108,7 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Mientras hay un diálogo abierto, el resto de la página queda inerte:
+    // ni el teclado ni el lector de pantalla pueden salir del diálogo.
+    function setPageInert(isInert) {
+        document.querySelectorAll('body > .skip-link, body > header, body > main, body > aside')
+            .forEach(el => { el.inert = isInert; });
+    }
+
     function showOverlay(overlay, focusTarget) {
+        setPageInert(true);
         overlay.classList.remove('hidden');
         overlay.setAttribute('aria-hidden', 'false');
         if (focusTarget) focusTarget.focus();
@@ -117,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function hideOverlay(overlay) {
         overlay.classList.add('hidden');
         overlay.setAttribute('aria-hidden', 'true');
+        setPageInert(false);
     }
 
     // --- Pausa: congela el cronómetro y muestra un modal accesible ---
@@ -188,9 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('reference-overlay');
         if (!overlay || gameEnded) return;
         resetIdleTimer();
-        overlay.classList.remove('hidden');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.getElementById('btn-reference-close').focus();
+        showOverlay(overlay, document.getElementById('btn-reference-close'));
         speakAssistant('Así debe quedar.');
         announceToScreenReader('Imagen de referencia abierta. Así debe quedar el rompecabezas. Presiona Escape para cerrar.');
     }
@@ -198,8 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeReference(restoreFocus = true) {
         const overlay = document.getElementById('reference-overlay');
         if (!overlay || !isReferenceOpen()) return;
-        overlay.classList.add('hidden');
-        overlay.setAttribute('aria-hidden', 'true');
+        hideOverlay(overlay);
         const btnReference = document.getElementById('btn-reference');
         if (restoreFocus && btnReference) btnReference.focus();
     }
@@ -259,11 +266,22 @@ document.addEventListener('DOMContentLoaded', () => {
             announceToScreenReader("Nivel Difícil. Usa las flechas para navegar. Presiona Enter para seleccionar e intercambiar piezas. Presiona R para girar.");
         }
 
-        for (let i = 0; i < totalPieces; i++) {
-            const slot = document.createElement('div');
-            slot.classList.add('drop-zone');
-            slot.dataset.index = i;
-            boardElement.appendChild(slot);
+        // Estructura de cuadrícula accesible: grid > row > gridcell. Las filas usan
+        // display: contents, así que el diseño (CSS grid) no cambia.
+        slots = [];
+        for (let r = 0; r < config.size; r++) {
+            const rowEl = document.createElement('div');
+            rowEl.classList.add('board-row');
+            rowEl.setAttribute('role', 'row');
+            for (let c = 0; c < config.size; c++) {
+                const slot = document.createElement('div');
+                slot.classList.add('drop-zone');
+                slot.setAttribute('role', 'gridcell');
+                slot.dataset.index = slots.length;
+                rowEl.appendChild(slot);
+                slots.push(slot);
+            }
+            boardElement.appendChild(rowEl);
         }
 
         for (let i = 0; i < totalPieces; i++) {
@@ -288,23 +306,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 piece.classList.add('clickable');
                 enablePointerControls(piece);
 
-                piece.setAttribute('tabindex', '0');
+                piece.setAttribute('tabindex', '-1');
                 piece.setAttribute('role', 'button');
                 piece.addEventListener('keydown', handleKeyboardRotate);
                 piece.addEventListener('keydown', handleArrowNavigation);
 
                 if (i === 0) addVisualCue(piece, 'tap');
-                boardElement.children[i].appendChild(piece);
+                slots[i].appendChild(piece);
                 updatePieceAriaLabel(piece, i, randomRot);
             }
             else if (config.difficulty === 'medium') {
                 piece.dataset.currentRotation = 0;
                 enablePointerControls(piece);
 
-                piece.setAttribute('tabindex', '0');
+                piece.setAttribute('tabindex', '-1');
                 piece.setAttribute('role', 'button');
                 piece.addEventListener('keydown', handleArrowNavigation);
                 piece.addEventListener('keydown', handleKeyboardSwap);
+                piece.setAttribute('aria-pressed', 'false'); // true mientras está seleccionada para intercambiar
 
                 if (i === 0) addVisualCue(piece, 'drag');
                 piecesArray.push(piece);
@@ -317,9 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 piece.classList.add('clickable');
                 enablePointerControls(piece);
 
-                piece.setAttribute('tabindex', '0');
+                piece.setAttribute('tabindex', '-1');
                 piece.setAttribute('role', 'button');
                 piece.addEventListener('keydown', handleKeyboardSwap);
+                piece.setAttribute('aria-pressed', 'false'); // true mientras está seleccionada para intercambiar
                 piece.addEventListener('keydown', handleKeyboardRotateHard);
                 piece.addEventListener('keydown', handleArrowNavigation);
 
@@ -339,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } while (piecesArray.length > 1 && isSolved());
 
             piecesArray.forEach((piece, index) => {
-                const slot = boardElement.children[index];
+                const slot = slots[index];
                 if (slot) {
                     slot.appendChild(piece);
                     const rot = parseInt(piece.dataset.currentRotation);
@@ -347,6 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Foco itinerante: el tablero es una sola parada de tabulación y dentro se navega con flechas.
+        const firstPiece = slots[0] && slots[0].children[0];
+        if (firstPiece) firstPiece.setAttribute('tabindex', '0');
 
         // Las piezas que ya empiezan bien colocadas quedan marcadas desde el inicio.
         document.querySelectorAll('.puzzle-piece').forEach(p => validatePiece(p, false));
@@ -376,6 +400,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         piece.setAttribute('aria-label', `${positionText}${stateText}${actionText}`);
+    }
+
+    // La pieza que recibe el foco (teclado o puntero) pasa a ser la parada de tabulación del tablero.
+    boardElement.addEventListener('focusin', (e) => {
+        const piece = e.target.closest('.puzzle-piece');
+        if (!piece) return;
+        boardElement.querySelectorAll('.puzzle-piece[tabindex="0"]').forEach(p => p.setAttribute('tabindex', '-1'));
+        piece.setAttribute('tabindex', '0');
+    });
+
+    function setSwapSelection(piece) {
+        if (selectedPieceForSwap) {
+            selectedPieceForSwap.classList.remove('selected-for-swap');
+            selectedPieceForSwap.setAttribute('aria-pressed', 'false');
+        }
+        selectedPieceForSwap = piece;
+        if (piece) {
+            piece.classList.add('selected-for-swap');
+            piece.setAttribute('aria-pressed', 'true');
+        }
     }
 
     function handleArrowNavigation(e) {
@@ -411,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newIndex = newRow * config.size + newCol;
         if (newIndex !== currentIndex) {
-            const newSlot = boardElement.children[newIndex];
+            const newSlot = slots[newIndex];
             if (newSlot && newSlot.children.length > 0) {
                 newSlot.children[0].focus();
             }
@@ -628,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function slotAtPoint(x, y) {
-        return Array.from(boardElement.children).find(slot => {
+        return slots.find(slot => {
             const r = slot.getBoundingClientRect();
             return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
         }) || null;
@@ -735,19 +779,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selectedPieceForSwap && currentPiece.classList.contains('correct')) {
             announceToScreenReader('Esta pieza ya está en su lugar.');
         } else if (!selectedPieceForSwap) {
-            selectedPieceForSwap = currentPiece;
-            currentPiece.classList.add('selected-for-swap');
+            setSwapSelection(currentPiece);
             const currentIndex = parseInt(currentSlot.dataset.index) + 1;
             announceToScreenReader(`Pieza ${currentIndex} seleccionada. Navega a otra pieza y presiona Enter para intercambiar.`);
         } else if (selectedPieceForSwap === currentPiece) {
-            selectedPieceForSwap.classList.remove('selected-for-swap');
-            selectedPieceForSwap = null;
+            setSwapSelection(null);
             const currentIndex = parseInt(currentSlot.dataset.index) + 1;
             announceToScreenReader(`Pieza ${currentIndex} deseleccionada.`);
         } else {
             const selected = selectedPieceForSwap;
-            selected.classList.remove('selected-for-swap');
-            selectedPieceForSwap = null;
+            setSwapSelection(null);
 
             if (movePieceToSlot(selected, currentSlot)) {
                 currentSlot.children[0].focus();
@@ -861,8 +902,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateMascotMessage(message) {
         if (mascotText) {
+            // Solo texto visible: los anuncios van por la única región aria-live (#screen-reader-announcer).
             mascotText.textContent = message;
-            mascotText.setAttribute('aria-label', `Mensaje del asistente: ${message}`);
         }
     }
 
@@ -976,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openSideMenu() {
+        setPageInert(true);
         sideMenuOverlay.classList.remove('hidden');
         sideMenuOverlay.setAttribute('aria-hidden', 'false');
         btnMenuToggle.setAttribute('aria-expanded', 'true');
@@ -995,6 +1037,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sideMenuOverlay.classList.add('hidden');
         sideMenuOverlay.setAttribute('aria-hidden', 'true');
         btnMenuToggle.setAttribute('aria-expanded', 'false');
+        setPageInert(false);
 
         if (btnMenuToggle) {
             btnMenuToggle.focus();
@@ -1002,6 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(sideMenuOverlay) {
+        trapModalKeys(sideMenuOverlay, closeSideMenu);
         sideMenuOverlay.addEventListener('click', (e) => {
             if (e.target === sideMenuOverlay) closeSideMenu();
         });
@@ -1052,12 +1096,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (remaining <= 0) {
             handleTimeUp();
-        } else if (remaining <= WARNING_SECONDS && !warningShown) {
-            warningShown = true;
+        } else if (warningsGiven < TIME_WARNINGS.length && remaining <= TIME_WARNINGS[warningsGiven]) {
+            // Si se saltó algún umbral (pestaña en segundo plano), avisa solo del más cercano.
+            while (warningsGiven < TIME_WARNINGS.length && remaining <= TIME_WARNINGS[warningsGiven]) warningsGiven++;
+            const secs = TIME_WARNINGS[warningsGiven - 1];
             const badge = timerDisplay ? timerDisplay.closest('.timer-badge') : null;
             if (badge) badge.classList.add('timer-warning');
-            giveFeedback(`¡Quedan ${WARNING_SECONDS} segundos! Tú puedes.`);
+            showTimeWarning(`¡Quedan ${secs} segundos!`);
+            giveFeedback(`¡Quedan ${secs} segundos! Tú puedes.`);
         }
+    }
+
+    // Aviso visual grande y temporal; el texto para el lector de pantalla va por la región aria-live.
+    let timeWarningTimeout;
+    function showTimeWarning(text) {
+        const banner = document.getElementById('time-warning');
+        if (!banner) return;
+        banner.querySelector('.time-warning-text').textContent = text;
+        banner.classList.remove('hidden');
+        clearTimeout(timeWarningTimeout);
+        timeWarningTimeout = setTimeout(hideTimeWarning, 6000);
+    }
+
+    function hideTimeWarning() {
+        const banner = document.getElementById('time-warning');
+        clearTimeout(timeWarningTimeout);
+        if (banner) banner.classList.add('hidden');
     }
 
     // Modo libre: cuenta hacia arriba. Modo cronometrado: cuenta hacia atrás.
@@ -1095,8 +1159,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mascotSource && mascotTarget) mascotTarget.append(...mascotSource.childNodes);
 
             // El juego que queda detrás deja de ser alcanzable con teclado y lector de pantalla.
-            document.querySelectorAll('.game-header-bar, #contenido-principal, .game-mascot')
-                .forEach(el => { el.inert = true; });
+            setPageInert(true);
+            hideTimeWarning();
 
             victoryModal.classList.remove('hidden');
             victoryModal.setAttribute('aria-hidden', 'false');
